@@ -1,19 +1,13 @@
 Explanation
-
 Traverse nums2 from right to left while maintaining a monotonic decreasing stack.
-
 For each element, pop smaller elements (since they can’t be the "next greater" for anyone).
-
 Store the next greater element (or -1 if none) in a hashmap for quick lookup.
-
 Finally, replace each element in nums1 with its precomputed next greater value.
 
 Time Complexity
-
 O(n + m) → n = nums2.size(), m = nums1.size(). Each element is pushed/popped at most once.
 
 Space Complexity
-
 O(n) → Stack and hashmap store up to n elements.
 
 Code
