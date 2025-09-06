@@ -1,0 +1,25 @@
+Explanation
+You are only allowed to change a 1 → 0 in n. This means you can never introduce a new 1 bit.
+If k has a 1 in any position where n has a 0, the transformation is impossible. This condition is checked using (n | k) != n.
+If possible, the number of changes needed is the count of bits where n has 1 but k has 0. These are exactly the differing bits (n ^ k).
+We use __builtin_popcount to efficiently count set bits in x = n ^ k, which gives the minimum number of changes.
+
+Time Complexity
+O(1) → Bitwise operations and popcount run in constant time.
+
+Space Complexity
+O(1) → Only a few integer variables used.
+
+Code
+class Solution {
+public:
+    int minChanges(int n, int k) {
+        // if k has a 1 where n has 0 → impossible
+        if((n | k) != n)
+            return -1;
+        
+        // count differing bits (only 1→0 allowed)
+        int x = n ^ k;
+        return __builtin_popcount(x);
+    }
+}
