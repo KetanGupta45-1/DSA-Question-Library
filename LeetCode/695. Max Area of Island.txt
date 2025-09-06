@@ -1,0 +1,55 @@
+Explanation
+Traverse the grid, and whenever an unvisited land cell (1) is found, perform DFS to explore the connected island.
+During DFS, accumulate the size (area) of the island by visiting all connected land cells.
+Keep track of the maximum area encountered across all islands.
+Return the maximum area after scanning the entire grid.
+
+Time Complexity
+O(n × m) → Each cell is visited at most once.
+
+Space Complexity
+O(n × m) → For the visited matrix and recursion stack in the worst case.
+
+Code
+class Solution
+{
+public:
+    int dfs(int i, int j, vector<vector<int>>& grid, vector<vector<bool>>& visited, int n, int m)
+    {
+        if(i < 0 || j < 0 || i >= n || j >= m || grid[i][j] == 0 || visited[i][j])
+            return 0;
+
+        visited[i][j] = true;
+        int area = 1;
+
+        area += dfs(i+1, j, grid, visited, n, m);
+        area += dfs(i-1, j, grid, visited, n, m);
+        area += dfs(i, j+1, grid, visited, n, m);
+        area += dfs(i, j-1, grid, visited, n, m);
+
+        return area;
+    }
+
+    int maxAreaOfIsland(vector<vector<int>>& grid)
+    {
+        int n = grid.size();
+        int m = grid[0].size();
+        int maxarea = 0;
+
+        vector<vector<bool>> visited(n, vector<bool>(m, false));
+
+        for(int i = 0; i < n; i++)
+        {
+            for(int j = 0; j < m; j++)
+            {
+                if(grid[i][j] == 1 && !visited[i][j])
+                {
+                    int area = dfs(i, j, grid, visited, n, m);
+                    maxarea = max(maxarea, area);
+                }
+            }
+        }
+
+        return maxarea;
+    }
+};
