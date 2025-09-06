@@ -1,0 +1,69 @@
+Explanation
+Use level-order traversal (BFS) to process nodes level by level.
+For each level, check whether both target nodes x and y appear.
+If both appear on the same level but are not siblings (not sharing the same parent), return true.
+If they are siblings, return false. If only one appears at a level, return false since cousins must be at the same depth.
+
+Time Complexity
+O(n) → Each node is visited once.
+
+Space Complexity
+O(w) → Queue stores up to the maximum width w of the tree (worst case O(n)).
+
+Code
+class Solution {
+public:
+    bool isCousins(TreeNode* root, int x, int y) {
+        if(!root)
+            return false;
+
+        queue<TreeNode*> q;
+        q.push(root);
+
+        while(!q.empty())
+        {
+            int n = q.size();
+            bool fx = false, fy = false;
+
+            for(int i = 0; i < n; i++)
+            {
+                TreeNode* curr = q.front();
+                q.pop();
+
+                if(curr->left && curr->right)
+                {
+                    int l = curr->left->val;
+                    int r = curr->right->val;
+                    if((l == x && r == y) || (l == y && r == x))
+                        return false;  
+                }
+
+                if(curr->left)
+                {
+                    q.push(curr->left);
+                    if(curr->left->val == x)
+                        fx = true;
+                    if(curr->left->val == y) 
+                        fy = true;
+                }
+
+                if(curr->right)
+                {
+                    q.push(curr->right);
+                    if(curr->right->val == x) 
+                        fx = true;
+                    if(curr->right->val == y) 
+                        fy = true;
+                }
+            }
+
+            if(fx && fy)
+                return true;
+
+            if(fx || fy)
+                return false; 
+        }
+
+        return false;
+    }
+};
