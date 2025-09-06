@@ -1,0 +1,52 @@
+Explanation
+
+Count the total occurrences of 'a', 'b', and 'c' in the string.
+
+If any character appears less than k, return -1 immediately.
+
+Use a sliding window to find the longest subarray that can be left unremoved while still having at least k of each character outside the window.
+
+The minimum number of characters to take is n - max_window, where max_window is the length of this subarray.
+
+Complexity
+
+Time: O(n) → single pass over the string.
+
+Space: O(1) → only fixed-size arrays of length 3 used.
+
+Code
+class Solution {
+public:
+    int takeCharacters(string s, int k) {
+        int n = s.size();
+        vector<int> total(3, 0);
+
+        for(char c : s)
+            total[c - 'a']++;
+            
+        if(total[0] < k || total[1] < k || total[2] < k)
+            return -1;
+
+        int max_window = 0;
+        vector<int> window(3, 0);
+        int j = 0;
+
+        for(int i = 0; i < n; i++)
+        {
+            window[s[i] - 'a']++;
+
+            while(j <= i && 
+                  (total[0] - window[0] < k || 
+                   total[1] - window[1] < k || 
+                   total[2] - window[2] < k))
+            {
+                window[s[j] - 'a']--;
+                j++;
+            }
+
+            max_window = max(max_window, i - j + 1);
+        }
+
+        return n - max_window;
+    }
+};

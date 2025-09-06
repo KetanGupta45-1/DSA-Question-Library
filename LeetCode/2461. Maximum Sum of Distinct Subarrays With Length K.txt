@@ -1,0 +1,49 @@
+Explanation
+
+Use a sliding window approach to maintain subarrays of length k with distinct elements.
+
+Maintain a set to ensure all elements in the current window are unique.
+
+Expand the window by adding nums[j] and shrink from the left when duplicates are found.
+
+When the window size reaches k, update maxsum and slide the window forward.
+
+Complexity
+
+Time: O(n) → each element is added and removed from the set at most once.
+
+Space: O(k) → for storing the current window in the set.
+
+Code
+class Solution {
+public:
+    long long maximumSubarraySum(vector<int>& nums, int k) {
+        unordered_set<int> s;
+        long long maxsum = 0, tempsum = 0;
+        int n = nums.size();
+        int i = 0;
+
+        for (int j = 0; j < n; j++)
+        {
+            while (s.count(nums[j]))
+            {
+                s.erase(nums[i]);
+                tempsum -= nums[i];
+                i++;
+            }
+
+            s.insert(nums[j]);
+            tempsum += nums[j];
+
+            if (j - i + 1 == k)
+            {
+                maxsum = max(maxsum, tempsum);
+                s.erase(nums[i]);
+                tempsum -= nums[i];
+                i++;
+            }
+        }
+
+        return maxsum;
+    }
+};

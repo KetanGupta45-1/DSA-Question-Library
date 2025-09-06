@@ -1,0 +1,40 @@
+Explanation
+Use a prefix sum approach to track the cumulative sum of elements.
+Maintain counts of even and odd prefix sums encountered so far.
+
+For each new prefix sum:
+If it’s even, the number of odd subarrays ending here equals the count of previous odd prefix sums.
+If it’s odd, the number of odd subarrays ending here equals the count of previous even prefix sums.
+Accumulate these counts modulo 1e9+7 to get the final answer.
+
+Complexity
+Time: O(n) → single pass over the array.
+Space: O(1) → only a few counters used.
+
+Code
+class Solution {
+public:
+    int numOfSubarrays(vector<int>& arr) {
+        int mod = 1e9 + 7;
+        int ans = 0;
+        int odd = 0, even = 1;  
+        int prefix_sum = 0;
+
+        for (int num : arr) 
+        {
+            prefix_sum += num;
+            if (prefix_sum % 2 == 0) 
+            {
+                ans = (ans + odd) % mod;
+                even++;
+            } 
+            else 
+            {
+                ans = (ans + even) % mod;
+                odd++;
+            }
+        }
+
+        return ans;
+    }
+};
