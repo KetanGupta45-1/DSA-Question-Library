@@ -1,0 +1,35 @@
+Explanation
+Use a stack to simulate recursion for inorder traversal.
+Traverse to the leftmost node, pushing all nodes onto the stack.
+Pop the top node, add its value to the result, then move to its right child.
+Repeat until both the stack is empty and the current node is nullptr.
+
+Complexity
+Time: O(n) → each node is visited once.
+Space: O(h) → stack space, where h is the height of the tree.
+
+Code
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        stack<TreeNode*> st;
+        vector<int> ans;
+        TreeNode* node = root;
+
+        while(node != nullptr || !st.empty())
+        {
+            while(node != nullptr)
+            {
+                st.push(node);
+                node = node->left;
+            }
+
+            node = st.top();
+            st.pop();
+            ans.push_back(node->val);
+            node = node->right;
+        }
+
+        return ans;
+    }
+};
