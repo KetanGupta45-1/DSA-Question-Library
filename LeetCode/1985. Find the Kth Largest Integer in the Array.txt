@@ -1,0 +1,23 @@
+Explanation
+Sort the array of strings representing numbers based on length first; longer numbers are larger.
+If two strings have the same length, sort them lexicographically.
+After sorting, the K-th largest is at index n - k.
+Return the number at that position.
+
+Complexity
+Time: O(n log n * m) → sorting n strings of max length m.
+Space: O(1) → in-place sort (ignoring recursion stack for sort).
+
+Code
+class Solution {
+public:
+    string kthLargestNumber(vector<string>& nums, int k) {
+        int n = nums.size();
+        sort(nums.begin(), nums.end(), [](const string& a, const string& b) {
+            if (a.size() != b.size())
+                return a.size() < b.size();
+            return a < b;
+        });
+        return nums[n-k];
+    }
+};

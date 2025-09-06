@@ -1,0 +1,33 @@
+Explanation
+Use DFS recursion to compute the height of each subtree.
+For each node, calculate leftheight and rightheight of its subtrees.
+If the absolute difference exceeds 1, mark the tree as not balanced.
+Return the height of the current node as 1 + max(leftheight, rightheight) to its parent.
+
+Complexity
+Time: O(n) → each node is visited once.
+Space: O(h) → recursion stack space (h = height of the tree).
+
+Code
+class Solution {
+public:
+    int helper(TreeNode* root, bool &isbalanced)
+    {   
+        if(!root)
+            return 0;
+        
+        int leftheight = helper(root->left, isbalanced);
+        int rightheight = helper(root->right, isbalanced);
+
+        if(abs(leftheight - rightheight) > 1)
+            isbalanced = false;
+
+        return 1 + max(leftheight, rightheight);
+    }
+
+    bool isBalanced(TreeNode* root) {
+        bool isbalanced = true;
+        helper(root, isbalanced);
+        return isbalanced;
+    }
+};

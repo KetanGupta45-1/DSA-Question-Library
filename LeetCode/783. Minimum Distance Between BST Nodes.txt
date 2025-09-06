@@ -1,0 +1,35 @@
+Explanation
+Perform an inorder traversal of the BST to get nodes in sorted order.
+Keep track of the previous node visited to calculate the difference with the current node.
+Update minidiff whenever a smaller difference is found.
+Return minidiff after traversal is complete.
+
+Complexity
+Time: O(n) → each node is visited once.
+Space: O(h) → recursion stack space (h = height of the BST).
+
+Code
+class Solution {
+public:
+  void inorder(TreeNode* root, TreeNode*& prev, int& minidiff)
+  {
+      if(root == nullptr)
+          return;
+
+      inorder(root->left, prev, minidiff);
+
+      if(prev != nullptr)
+          minidiff = min(minidiff, root->val - prev->val);
+      
+      prev = root;
+
+      inorder(root->right, prev, minidiff);
+  }
+
+  int minDiffInBST(TreeNode* root) {
+      TreeNode* prev = nullptr;
+      int minidiff = INT_MAX;
+      inorder(root, prev, minidiff);
+      return minidiff;
+  }
+};
