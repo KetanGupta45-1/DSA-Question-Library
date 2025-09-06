@@ -1,0 +1,35 @@
+Explanation
+Use DFS recursion to explore all root-to-leaf paths in the tree.
+Maintain a running sum and a temporary vector temp to store the current path.
+When a leaf node is reached, check if the sum equals the target → if yes, add temp to the answer.
+Recursively explore left and right subtrees, passing updated sum and temp.
+
+Complexity
+Time: O(n * h) → every node is visited once, and copying paths of length up to h for each valid path.
+Space: O(h) → recursion stack for tree height h + temporary path storage.
+
+Code
+class Solution {
+public:
+    void helper(TreeNode* root, int target, vector<vector<int>>& ans, vector<int> temp, int sum)
+    {
+        if(root == nullptr)
+            return;
+        
+        sum += root->val;
+        temp.push_back(root->val);
+
+        if(root->left == nullptr && root->right == nullptr && sum == target)
+            ans.push_back(temp);
+        
+        helper(root->left, target, ans, temp, sum);
+        helper(root->right, target, ans, temp, sum);
+    }
+
+    vector<vector<int>> pathSum(TreeNode* root, int target) {
+        vector<vector<int>> ans;
+        vector<int> temp;
+        helper(root, target, ans, temp, 0);
+        return ans;
+    }
+};
