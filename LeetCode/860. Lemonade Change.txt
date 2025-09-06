@@ -1,19 +1,13 @@
 Explanation
-
 Keep counters for $5 and $10 bills (c5, c10).
-
 If customer pays with $5, just increase c5.
-
 If customer pays with $10, give back one $5 if available.
-
 If customer pays with $20, prefer giving one $10 + one $5 (if possible), otherwise give three $5 bills; if neither works, return false.
 
 Time Complexity
-
 O(n) → Iterate through all customers once.
 
 Space Complexity
-
 O(1) → Only a few integer counters used.
 
 Code
