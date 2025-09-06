@@ -1,0 +1,38 @@
+Explanation
+You recursively check whether each node’s value lies within its valid range:
+For the left child, the max allowed value is the parent’s value.
+For the right child, the min allowed value is the parent’s value.
+If any node violates these bounds, return false.
+You use long for bounds (LONG_MIN, LONG_MAX) to safely handle cases where the node value equals INT_MIN or INT_MAX.
+
+Complexity
+Time: O(n) → each node is visited once.
+Space: O(h) recursion stack, where h is tree height (O(log n) for balanced BST, O(n) for skewed).
+
+Code
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) 
+    {
+        stack<TreeNode*> st;
+        TreeNode* curr = root;
+        long prev = LONG_MIN;
+
+        while (curr || !st.empty())
+        {
+            while (curr) {
+                st.push(curr);
+                curr = curr->left;
+            }
+            curr = st.top();
+            st.pop();
+
+            if (curr->val <= prev) return false;
+            prev = curr->val;
+
+            curr = curr->right;
+        }
+
+        return true;
+    }
+};
