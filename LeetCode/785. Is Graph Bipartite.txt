@@ -1,0 +1,51 @@
+Explanation
+Use a color array initialized with -1 (unvisited).
+Run DFS starting from each unvisited node, assigning alternating colors (0 and 1) to neighbors.
+If a neighbor already has the same color as the current node, the graph is not bipartite.
+If all connected components can be colored without conflicts, the graph is bipartite.
+
+Time Complexity
+O(V + E) → Each node and edge is visited once in DFS.
+
+Space Complexity
+O(V) → For the color array and recursion stack (in worst case, depth = V).
+
+Code
+class Solution {
+public:
+    bool dfs(vector<vector<int>>& graph, vector<int>& color, int node, int val)
+    {
+        color[node] = val;
+
+        for(auto &neigh : graph[node])
+        {
+            if(color[neigh] == color[node])
+                return false;
+            
+            if(color[neigh] == -1)
+            {
+                if(dfs(graph, color, neigh, 1 - color[node]) == false)
+                    return false;
+            }
+        }
+
+        return true;  
+    }
+    
+    bool isBipartite(vector<vector<int>>& graph) 
+    {
+        int n = graph.size();
+        vector<int> color(n, -1);
+
+        for(int i = 0; i < n; i++)
+        {
+            if(color[i] == -1)
+            {
+                if(dfs(graph, color, i, 0) == false)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+};
