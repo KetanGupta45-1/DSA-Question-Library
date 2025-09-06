@@ -1,0 +1,39 @@
+Explanation
+Do an inorder traversal and store all nodes in a vector arr.
+Since arr is sorted, the answer is simply arr[k-1].
+
+Complexity
+Time: O(n) because you visit every node.
+
+Space: O(n) for storing all nodes in arr.
+This works fine, but it’s not optimal if you only need the k-th element. You can stop early during traversal.
+
+Optimized Approach (Early Stop)
+Instead of storing all nodes, keep a counter while doing inorder traversal and stop when you reach the k-th node.
+
+Code
+class Solution {
+public:
+    int ans, count = 0;
+
+    void inorder(TreeNode* root, int k)
+    {
+        if (!root) return;
+
+        inorder(root->left, k);
+
+        count++;
+        if (count == k) {
+            ans = root->val;
+            return;
+        }
+
+        inorder(root->right, k);
+    }
+
+    int kthSmallest(TreeNode* root, int k) 
+    {
+        inorder(root, k);
+        return ans;
+    }
+};
