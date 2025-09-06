@@ -1,0 +1,42 @@
+Explanation
+Use level-order traversal (BFS) with a queue to process nodes level by level.
+Push right child first and then left child, so the first node at each level is the rightmost node.
+For each level, record the first node in the queue as it represents the right-side view at that level.
+Continue BFS until all levels are processed and return the collected values.
+
+Complexity
+Time: O(n) → every node is visited exactly once.
+Space: O(n) → for the queue to store nodes at each level.
+
+Code
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        if (root == nullptr)
+            return {};
+
+        vector<int> ans;
+        queue<TreeNode*> q;
+        q.push(root);
+
+        while (!q.empty())
+        {
+            int n = q.size();
+            for (int i = 0; i < n; ++i)
+            {
+                TreeNode* node = q.front();
+                q.pop(); 
+
+                if (i == 0)
+                    ans.push_back(node->val);
+
+                if (node->right)
+                    q.push(node->right);
+                if (node->left)
+                    q.push(node->left);
+            }
+        }
+
+        return ans;
+    }
+};
