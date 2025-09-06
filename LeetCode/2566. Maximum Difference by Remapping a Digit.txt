@@ -1,0 +1,59 @@
+To maximize the number replace the first number by 9 everywhere it exists
+To Minimize the number replace the first number by 0 everywhere it exists.
+
+TC -> O(4*n) // 4 times looping
+SC -> O(1) // no external space
+
+
+class Solution {
+public:
+    int minMaxDifference(int num) {
+        string s = to_string(num);
+
+        // Step 1: Maximize
+        string max_s = s;
+        char d1 = ' ';
+        for (char c : s) 
+        {
+            if (c != '9') 
+            {
+                d1 = c;
+                break;
+            }
+        }
+
+        if (d1 != ' ') 
+        {
+            for (char &c : max_s) 
+            {
+                if (c == d1)
+                    c = '9';
+            }
+        }
+
+        // Step 2: Minimize
+        string min_s = s;
+        char d2 = ' ';
+        for (char c : s) 
+        {
+            if (c != '0') 
+            {
+                d2 = c;
+                break;
+            }
+        }
+        if (d2 != ' ') 
+        {
+            for (char &c : min_s) 
+            {
+                if (c == d2)
+                    c = '0';
+            }
+        }
+
+        int max_num = stoi(max_s);
+        int min_num = stoi(min_s);
+
+        return max_num - min_num;
+    }
+};
