@@ -1,0 +1,35 @@
+Explanation
+Use recursion with a pointer i that moves through the preorder array.
+At each step, only construct a node if its value lies within the allowed range (mini, maxi).
+
+For the current root:
+Recurse left with the updated bound (mini, root->val).
+Recurse right with the updated bound (root->val, maxi).
+This ensures nodes are placed correctly in BST structure without needing array splits.
+
+Time Complexity
+O(n) → Each element is visited exactly once.
+
+Space Complexity
+O(h) → Recursion stack, where h is the height of the tree (worst case O(n), best case O(log n)).
+
+Code
+class Solution {
+public:
+    TreeNode* helper(vector<int>& preorder, int& i, int mini, int maxi)
+    {
+        if (i == preorder.size() || preorder[i] < mini || preorder[i] > maxi)
+            return nullptr;
+
+        TreeNode* root = new TreeNode(preorder[i++]);
+        root->left = helper(preorder, i, mini, root->val);
+        root->right = helper(preorder, i, root->val, maxi);
+        return root;
+    }
+
+    TreeNode* bstFromPreorder(vector<int>& preorder)
+    {
+        int i = 0;
+        return helper(preorder, i, INT_MIN, INT_MAX);
+    }
+};
