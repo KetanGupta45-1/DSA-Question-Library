@@ -1,17 +1,11 @@
 Explanation
-
 Count the total occurrences of 'a', 'b', and 'c' in the string.
-
 If any character appears less than k, return -1 immediately.
-
 Use a sliding window to find the longest subarray that can be left unremoved while still having at least k of each character outside the window.
-
 The minimum number of characters to take is n - max_window, where max_window is the length of this subarray.
 
 Complexity
-
 Time: O(n) → single pass over the string.
-
 Space: O(1) → only fixed-size arrays of length 3 used.
 
 Code
