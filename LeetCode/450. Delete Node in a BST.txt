@@ -1,0 +1,52 @@
+Explanation
+Recursively traverse the BST to locate the node with value key.
+Case 1 (No children): Delete the node and return nullptr.
+Case 2 (One child): Replace the node with its non-null child.
+Case 3 (Two children): Find the rightmost node in the left subtree (predecessor), copy its value to the current node, then recursively delete that predecessor.
+
+Complexity
+Time: O(h) → where h is the height of the BST (O(log n) for balanced, O(n) for skewed).
+Space: O(h) → recursion stack space.
+
+Code
+class Solution {
+public:
+    TreeNode* findRightMost(TreeNode* node)
+    {
+        while(node->right)
+            node = node->right;
+        return node;
+    }
+
+    TreeNode* deleteNode(TreeNode* root, int key)
+    {
+        if(root == nullptr)
+            return nullptr;
+
+        if(root->val > key)
+            root->left = deleteNode(root->left, key);
+        else if(root->val < key)
+            root->right = deleteNode(root->right, key);
+        else
+        {
+            if(!root->left && !root->right)
+            {
+                delete root;
+                return nullptr;
+            }
+
+            if(!root->left || !root->right)
+            {
+                TreeNode* child = root->left ? root->left : root->right;
+                delete root;
+                return child;
+            }
+
+            TreeNode* rightMost = findRightMost(root->left);
+            root->val = rightMost->val;
+            root->left = deleteNode(root->left, rightMost->val);
+        }
+
+        return root;
+    }
+};
