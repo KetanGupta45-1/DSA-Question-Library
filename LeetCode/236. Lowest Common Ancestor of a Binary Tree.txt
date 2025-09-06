@@ -1,0 +1,35 @@
+Explanation
+Use DFS recursion to traverse the tree.
+If the current node is nullptr, p, or q, return it.
+Recursively search left and right subtrees for p and q.
+If both left and right subtrees return non-null, the current node is the LCA; otherwise, return the non-null child.
+
+Complexity
+Time: O(n) → each node is visited once.
+Space: O(h) → recursion stack, where h is the height of the tree (worst case O(n) for skewed tree).
+
+Code
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if(root == nullptr)
+            return root;
+
+        if(root == p || root == q)
+            return root;
+        
+        TreeNode* leftn = lowestCommonAncestor(root->left, p, q);
+        TreeNode* rightn = lowestCommonAncestor(root->right, p, q);
+
+        if(leftn != nullptr && rightn != nullptr)
+            return root;
+        
+        if(leftn != nullptr)
+            return leftn;
+        
+        if(rightn != nullptr)
+            return rightn;
+        
+        return nullptr;
+    }
+};
