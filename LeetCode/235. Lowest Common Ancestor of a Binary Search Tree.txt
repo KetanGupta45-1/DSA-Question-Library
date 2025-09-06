@@ -1,0 +1,32 @@
+Explanation
+
+Since it’s a BST, the left child < parent < right child property can be used.
+
+Start from the root and iterate down the tree.
+
+If both p and q are smaller than root, move to root->left; if both are larger, move to root->right.
+
+Otherwise, the current node is the LCA, because one node is on the left and the other is on the right (or matches root).
+
+Complexity
+
+Time: O(h) → where h is the height of the BST (O(log n) for balanced, O(n) for skewed).
+
+Space: O(1) → iterative, no recursion stack used.
+
+Code
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        while (root) 
+        {
+            if (p->val < root->val && q->val < root->val)
+                root = root->left;
+            else if (p->val > root->val && q->val > root->val)
+                root = root->right;
+            else
+                return root;
+        }
+        return nullptr;
+    }
+};

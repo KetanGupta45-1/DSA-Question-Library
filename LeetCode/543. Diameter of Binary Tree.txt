@@ -1,0 +1,33 @@
+Explanation
+Use DFS recursion to compute the maximum depth of each subtree.
+For every node, the sum of left and right subtree depths represents the path passing through that node.
+Keep a global diameter variable to store the maximum path length found so far.
+Return 1 + max(left, right) for each node to its parent to calculate depths correctly.
+
+Complexity
+Time: O(n) → each node is visited once.
+Space: O(h) → recursion stack space (h = tree height, worst case O(n) for skewed tree).
+
+Code
+class Solution {
+public:
+    int diameter = 0;
+
+    int maxdepth(TreeNode* root)
+    {
+        if(root == nullptr)
+            return 0;
+
+        int left = maxdepth(root->left);
+        int right = maxdepth(root->right);
+
+        diameter = max(diameter, left + right);
+
+        return 1 + max(left, right);
+    }
+
+    int diameterOfBinaryTree(TreeNode* root) {
+        maxdepth(root);
+        return diameter;
+    }
+};
