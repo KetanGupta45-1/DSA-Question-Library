@@ -1,0 +1,54 @@
+Explanation
+Use DFS traversal to process subtrees and collect distances of leaf nodes.
+A leaf node directly returns {1} meaning distance 1 from itself.
+At each parent node, compare all distances from the left and right subtree → if l + r <= distance, count it as a good leaf pair.
+Pass updated distances (child_distance + 1) upward to the parent for further checks.
+
+Complexity
+Time: O(n * d²) in worst case (for each node, distances from left × right subtrees compared).
+Space: O(h + d) → recursion stack (h = tree height) + distance storage (d = max allowed distance).
+
+Code
+class Solution {
+public:
+    vector<int> solve(TreeNode* root, int distance, int &goodLeafNodes) {
+        if(!root) {
+            return {0};
+        }
+
+        if(root->left == NULL && root->right == NULL) {
+            return {1};
+        }
+
+        auto left_d  = solve(root->left, distance, goodLeafNodes);
+        auto right_d = solve(root->right, distance, goodLeafNodes);
+
+        for(int &l : left_d) {
+            for(int &r : right_d) {
+                if((l != 0 && r != 0) && l + r <= distance) 
+                    goodLeafNodes++;
+            }
+        }
+
+        vector<int> curr_d;
+        for(int &ld : left_d) {
+            if(ld != 0 && ld + 1 <= distance) {
+                curr_d.push_back(ld+1);
+            }
+        }
+
+        for(int &rd : right_d) {
+            if(rd != 0 && rd+1 <= distance) {
+                curr_d.push_back(rd+1);
+            }
+        }
+
+        return curr_d;
+    }
+
+    int countPairs(TreeNode* root, int distance) {
+        int goodLeafNodes = 0;
+        solve(root, distance, goodLeafNodes);
+        return goodLeafNodes;
+    }
+};
