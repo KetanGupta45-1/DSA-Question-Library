@@ -1,0 +1,42 @@
+Explanation
+First loop places all positive numbers in even indices (0, 2, 4,...) of the answer array.
+Second loop places all negative numbers in odd indices (1, 3, 5,...) of the answer array.
+This guarantees alternating positive and negative arrangement since input has equal positives and negatives.
+
+Time Complexity
+O(n) → Each element is checked twice (once in each loop).
+
+Space Complexity
+O(n) → Extra array ans of size n is used.
+
+Code
+class Solution {
+public:
+    vector<int> rearrangeArray(vector<int>& nums) {
+        int n = nums.size();
+        int i = 0, j = 0;
+        bool flagp = true, flagn = false;
+        vector<int>ans(n);
+
+        for(int i = 0; i<n; i++)
+        {
+            if(nums[i] > 0)
+            {
+                ans[j]  = nums[i];
+                j = j+2;
+            }
+        }
+
+        j = 1;
+        for(int i=0; i<n; i++)
+        {
+            if(nums[i] < 0)
+            {
+                ans[j] = nums[i];
+                j = j+2;
+            }
+        }
+
+        return ans;
+    }
+};
