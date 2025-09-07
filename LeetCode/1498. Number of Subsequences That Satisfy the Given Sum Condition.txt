@@ -1,0 +1,89 @@
+🔹 Brute Force Approach
+----------------------------------------------------------------------------------------------------
+Explanation
+Generate all possible subsequences of the array using recursion/bitmask.
+For each subsequence, compute its minimum and maximum element.
+If min + max <= target, count that subsequence as valid.
+
+Complexity
+Time Complexity: 
+𝑂(2^𝑛 ⋅ 𝑛)
+Space Complexity: 
+𝑂(𝑛) (recursion stack or subset storage).
+
+Code
+class Solution {
+public:
+    int mod = 1e9+7;
+
+    int numSubseq(vector<int>& nums, int target) {
+        int n = nums.size();
+        long long count = 0;
+        int total = 1 << n; 
+
+        for(int mask=0; mask<total; mask++) {
+            int mini = INT_MAX, maxi = INT_MIN;
+            for(int i=0; i<n; i++) {
+                if(mask & (1<<i)) {
+                    mini = min(mini, nums[i]);
+                    maxi = max(maxi, nums[i]);
+                }
+            }
+            if(mini != INT_MAX && maxi != INT_MIN && mini + maxi <= target)
+                count = (count+1) % mod;
+        }
+        return count;
+    }
+};
+
+
+
+🔹 Optimized Approach (Two Pointers + Precomputation)
+---------------------------------------------------------------------------------------------------------
+
+Explanation
+
+Sort the array to make subsequences easier to handle (min is left side, max is right side).
+Precompute powers of 2 (pow[i] = 2^i % mod) to quickly count subsequences.
+Use two pointers (l at start, r at end).
+If nums[l] + nums[r] <= target:
+Any subset of the elements between l and r can be chosen.
+That gives 2^(r-l) subsequences.
+Add this to the answer, then move l++.
+Else (nums[l] + nums[r] > target): move r-- to reduce the sum.
+Continue until l > r.
+
+Complexity
+
+Time Complexity: 
+𝑂(𝑛log⁡𝑛) (sorting + two pointers).
+Space Complexity: 
+O(n) (for power array).
+
+
+Code (Optimized)
+class Solution {
+public:
+    int numSubseq(vector<int>& nums, int target) {
+        int n = nums.size();
+        int count = 0;
+        int mod = 1e9+7;
+        sort(nums.begin(), nums.end());
+
+        vector<int> pow(n);
+        pow[0] = 1;
+        for(int i=1; i<n; i++)
+            pow[i] = (2 * pow[i-1]) % mod;
+
+        int l=0, r = n-1;
+
+        while(l <= r) {
+            if(nums[l] + nums[r] <= target) {
+                count = (count + pow[r-l]) % mod;
+                l++;
+            }
+            else r--;
+        }
+        return count;
+    }
+};
