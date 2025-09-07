@@ -1,12 +1,16 @@
+Brute Force
+--------------------------------------------------------------------------------------------------------------------------
 Explanation
-Count the total occurrences of 'a', 'b', and 'c' in the string.
-If any character appears less than k, return -1 immediately.
-Use a sliding window to find the longest subarray that can be left unremoved while still having at least k of each character outside the window.
-The minimum number of characters to take is n - max_window, where max_window is the length of this subarray.
 
-Complexity
-Time: O(n) → single pass over the string.
-Space: O(1) → only fixed-size arrays of length 3 used.
+Try all possible ways of taking characters from the left and right such that at least k of each (a, b, c) are included.
+For each combination, check if the counts are valid and compute total characters taken.
+Return the minimum across all valid options.
+
+Time Complexity
+O(n²) → checking every left/right split and counting characters each time.
+
+Space Complexity
+O(1) → just counters for a, b, c.
 
 Code
 class Solution {
@@ -14,33 +18,63 @@ public:
     int takeCharacters(string s, int k) {
         int n = s.size();
         vector<int> total(3, 0);
+        for (char c : s) total[c - 'a']++;
+        if (total[0] < k || total[1] < k || total[2] < k) return -1;
 
-        for(char c : s)
-            total[c - 'a']++;
-            
-        if(total[0] < k || total[1] < k || total[2] < k)
-            return -1;
-
-        int max_window = 0;
-        vector<int> window(3, 0);
-        int j = 0;
-
-        for(int i = 0; i < n; i++)
-        {
-            window[s[i] - 'a']++;
-
-            while(j <= i && 
-                  (total[0] - window[0] < k || 
-                   total[1] - window[1] < k || 
-                   total[2] - window[2] < k))
-            {
-                window[s[j] - 'a']--;
-                j++;
+        int ans = n;
+        for (int left = 0; left <= n; left++) {
+            vector<int> count(3, 0);
+            for (int i = 0; i < left; i++) count[s[i] - 'a']++;
+            for (int right = n; right >= left; right--) {
+                vector<int> cpy = count;
+                for (int j = right; j < n; j++) cpy[s[j] - 'a']++;
+                if (cpy[0] >= k && cpy[1] >= k && cpy[2] >= k)
+                    ans = min(ans, left + (n - right));
             }
-
-            max_window = max(max_window, i - j + 1);
         }
+        return ans;
+    }
+};
 
-        return n - max_window;
+--------------------------------------------------------------------------------------------------------------------------
+Optimized (Sliding Window)
+--------------------------------------------------------------------------------------------------------------------------
+Explanation
+
+Count total occurrences of a, b, c. If any count < k, return -1.
+Think in reverse: instead of what we take, consider the substring we keep.
+Use a sliding window to find the longest substring we can keep such that outside it, at least k of each character remain.
+Maintain counts of the current window, shrink from the left if keeping it violates the requirement.
+Answer = n - max_window_length.
+
+Time Complexity
+O(n) → each character added and removed at most once.
+
+Space Complexity
+O(1) → fixed arrays of size 3 for counts.
+
+Code
+class Solution {
+public:
+    int takeCharacters(string s, int k) {
+        vector<int> total(3, 0);
+        for (char c : s) total[c - 'a']++;
+        if (total[0] < k || total[1] < k || total[2] < k) return -1;
+
+        int n = s.size();
+        vector<int> window(3, 0);
+        int i = 0, max_keep = 0;
+
+        for (int j = 0; j < n; j++) {
+            window[s[j] - 'a']++;
+            while (i <= j && (total[0] - window[0] < k ||
+                              total[1] - window[1] < k ||
+                              total[2] - window[2] < k)) {
+                window[s[i] - 'a']--;
+                i++;
+            }
+            max_keep = max(max_keep, j - i + 1);
+        }
+        return n - max_keep;
     }
 };
