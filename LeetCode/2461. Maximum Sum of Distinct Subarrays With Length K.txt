@@ -1,3 +1,59 @@
+Brute Force Explanation
+-------------------------------------------------------------------------------------------------------------------
+
+Iterate over all possible subarrays of length k.
+For each subarray:
+Check if all elements are distinct.
+If yes, compute the sum of this subarray.
+Update the maximum sum if the current sum is larger.
+Return the maximum sum after checking all valid subarrays.
+This works but is inefficient because we repeatedly check distinctness and sum for every subarray.
+
+Time Complexity
+There are O(n) subarrays of length k.
+For each subarray, checking distinctness and sum takes O(k).
+So total time = O(n * k).
+
+Space Complexity
+Space = O(k). (set)
+
+Brute Force Code
+class Solution {
+public:
+    long long maximumSubarraySum(vector<int>& nums, int k) {
+        int n = nums.size();
+        long long maxsum = 0;
+
+        for (int i = 0; i + k <= n; i++)
+        {
+            unordered_set<int> s;
+            long long sum = 0;
+            bool distinct = true;
+
+            for (int j = i; j < i + k; j++)
+            {
+                if (s.count(nums[j]))
+                {
+                    distinct = false;
+                    break;
+                }
+                s.insert(nums[j]);
+                sum += nums[j];
+            }
+
+            if (distinct)
+                maxsum = max(maxsum, sum);
+        }
+
+        return maxsum;
+    }
+};
+
+
+------------------------------------------------------------------------------------------------------------------
+Optimized
+--------------------------------------------------------------------------------------------------------------------
+
 Explanation
 Use a sliding window approach to maintain subarrays of length k with distinct elements.
 Maintain a set to ensure all elements in the current window are unique.
