@@ -1,66 +1,75 @@
-Explanation
-Count the number of set bits in num2 (requiredSetBitCount).
-Start with x = num1 and count its set bits (currSetBitCount).
-Adjust x to have the same number of set bits as num2:
-If currSetBitCount < requiredSetBitCount, set additional 0 bits from least significant bit upwards.
-If currSetBitCount > requiredSetBitCount, unset 1 bits from least significant bit upwards.
-Return the modified x which minimizes num1 XOR x while matching the set bit count of num2.
+Brute Force Approach
+-------------------------------------------------------------------------------------------------------------------------
+Idea
+Count set bits of num2 → k.
+Generate all numbers with exactly k set bits (up to 2^bits where bits = log2(num1)+1).
+Compute XOR with num1 for each, keep the minimum.
 
 Complexity
-Time: O(32) → iterate over at most 32 bits of the integer.
-Space: O(1) → no extra space beyond counters.
+Time: O(2^n × n) → exponential (too slow for 32-bit).
+Space: O(2^n) (storing candidates).
+
+
+Code Sketch
+int setbits = __builtin_popcount(num2);
+vector<int> candidates;
+for (int i = 0; i < (1<<bits); i++)
+    if (__builtin_popcount(i) == setbits)
+        candidates.push_back(i);
+
+int ans = 0, best = INT_MAX;
+for (int c : candidates) {
+    int val = (c ^ num1);
+    if (val < best) {
+        best = val;
+        ans = c;
+    }
+}
+return ans;
+
+
+
+--------------------------------------------------------------------------------------------------------------------------
+Optimized Greedy Approach
+---------------------------------------------------------------------------------------------------------------------------
+
+Idea
+Count required set bits = popcount(num2).
+First, try to match num1’s high bits (to minimize XOR).
+If not enough bits, add remaining bits starting from lowest positions (to keep XOR small).
+
+Steps
+Traverse from MSB → LSB:
+If num1 bit is set, take it into x until we run out of quota.
+Then traverse from LSB → MSB:
+Fill leftover required set bits into x.
+
+Complexity
+Time: O(32) → constant.
+Space: O(1).
 
 Code
 class Solution {
 public:
-    bool isSet(int &x, int bit) 
-    {
-        return x & (1 << bit);
-    }
+    int minimizeXor(int num1, int num2) {
+        int need = __builtin_popcount(num2);
+        int x = 0;
 
-    bool setBit(int &x, int bit)
-    {
-        return x |= (1 << bit);
-    }
-
-    bool unsetBit(int &x, int bit) 
-    {
-        return x &= ~(1 << bit);
-    }
-
-    int minimizeXor(int num1, int num2) 
-    {
-        int x = num1;
-
-        int requiredSetBitCount = __builtin_popcount(num2);
-        int currSetBitCount = __builtin_popcount(x);
-
-        int bit = 0;
-        if(currSetBitCount < requiredSetBitCount) 
-        {
-            while(currSetBitCount < requiredSetBitCount) 
-            {
-                if(!isSet(x, bit)) 
-                {
-                    setBit(x, bit);
-                    currSetBitCount++;
-                }
-                bit++;
+        // Step 1: match higher bits of num1
+        for (int b = 31; b >= 0 && need > 0; b--)
+            if (num1 & (1<<b)) {
+                x |= (1<<b);
+                need--;
             }
-        } 
-        else if(currSetBitCount > requiredSetBitCount) 
-        {
-            while(currSetBitCount > requiredSetBitCount) 
-            {
-                if(isSet(x, bit)) 
-                {
-                    unsetBit(x, bit);
-                    currSetBitCount--;
-                }
-                bit++;
+
+        // Step 2: fill remaining from lower bits
+        for (int b = 0; b <= 31 && need > 0; b++)
+            if (!(x & (1<<b))) {
+                x |= (1<<b);
+                need--;
             }
-        }
 
         return x;
     }
 };
+
