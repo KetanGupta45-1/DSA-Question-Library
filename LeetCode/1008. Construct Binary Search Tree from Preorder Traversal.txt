@@ -1,24 +1,56 @@
-Explanation
-Use recursion with a pointer i that moves through the preorder array.
-At each step, only construct a node if its value lies within the allowed range (mini, maxi).
+Brute Force Approach
+-------------------------------------------------------------------------------------------------------------------------------------
 
-For the current root:
-Recurse left with the updated bound (mini, root->val).
-Recurse right with the updated bound (root->val, maxi).
-This ensures nodes are placed correctly in BST structure without needing array splits.
+Explanation
+Start from the root as the first element of the preorder array.
+For each subsequent element, insert it into the BST using standard BST insertion logic (O(h) per insertion).
+Repeat for all elements until the BST is built.
 
 Time Complexity
-O(n) → Each element is visited exactly once.
-
+Worst case: O(n²) (if the tree becomes skewed).
+Best case (balanced tree): O(n log n).
 Space Complexity
-O(h) → Recursion stack, where h is the height of the tree (worst case O(n), best case O(log n)).
+O(h) recursion/stack space for insertion (worst case O(n)).
 
 Code
 class Solution {
 public:
-    TreeNode* helper(vector<int>& preorder, int& i, int mini, int maxi)
-    {
-        if (i == preorder.size() || preorder[i] < mini || preorder[i] > maxi)
+    TreeNode* insert(TreeNode* root, int val) {
+        if(!root) return new TreeNode(val);
+        if(val < root->val) root->left = insert(root->left, val);
+        else root->right = insert(root->right, val);
+        return root;
+    }
+
+    TreeNode* bstFromPreorder(vector<int>& preorder) {
+        TreeNode* root = nullptr;
+        for(int x : preorder)
+            root = insert(root, x);
+        return root;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+🟠 Optimized Approach
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Use recursion with bounds (mini, maxi) and an index pointer i.
+At each step, if preorder[i] lies outside bounds, return null.
+Otherwise, create a node and recursively build its left and right subtrees with updated bounds.
+This avoids repeated searching/insertion and ensures preorder is consumed in order.
+
+Time Complexity
+O(n) → each element processed exactly once.
+Space Complexity
+O(h) recursion stack, worst O(n).
+
+Code
+class Solution {
+public:
+    TreeNode* helper(vector<int>& preorder, int& i, int mini, int maxi) {
+        if(i == preorder.size() || preorder[i] < mini || preorder[i] > maxi)
             return nullptr;
 
         TreeNode* root = new TreeNode(preorder[i++]);
@@ -27,8 +59,7 @@ public:
         return root;
     }
 
-    TreeNode* bstFromPreorder(vector<int>& preorder)
-    {
+    TreeNode* bstFromPreorder(vector<int>& preorder) {
         int i = 0;
         return helper(preorder, i, INT_MIN, INT_MAX);
     }
