@@ -1,0 +1,88 @@
+Brute Force Approach
+----------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Reverse the graph: for each edge (u, v), store v -> u (so we can move child → parent).
+For each node i, run a fresh DFS to collect all its ancestors.
+Use a visited array per DFS to avoid duplicates, then sort results.
+
+Complexity
+Time: O(n * (n + e)) (DFS from each node).
+Space: O(n + e) for graph + O(n^2) for answers.
+
+Code
+class Solution {
+public:
+    void dfs(int node, unordered_map<int, vector<int>>& adj,
+             vector<vector<int>>& ans, vector<bool>& visited, int start) 
+    {
+        for (int parent : adj[node]) {
+            if (!visited[parent]) {
+                ans[start].push_back(parent);
+                visited[parent] = true;
+                dfs(parent, adj, ans, visited, start);
+            }
+        }
+    }
+
+    vector<vector<int>> getAncestors(int n, vector<vector<int>>& edges) {
+        unordered_map<int, vector<int>> adj;
+        for (auto &e : edges) adj[e[1]].push_back(e[0]);
+
+        vector<vector<int>> ans(n);
+        for (int i = 0; i < n; i++) {
+            vector<bool> visited(n, false);
+            dfs(i, adj, ans, visited, i);
+            sort(ans[i].begin(), ans[i].end());
+        }
+        return ans;
+    }
+};
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+Optimized Approach (DFS + Memoization)
+---------------------------------------------------------------------------------------------------------------------------------------
+Explanation (5 points)
+
+Reverse the graph (child → parents).
+Use DFS to compute ancestors of each node, but cache results so each node’s ancestors are computed once.
+For node i, recursively gather ancestors of its parents.
+Store results in memo[i] and reuse when another node needs them.
+Sort the ancestor list at the end.
+
+Complexity
+Time: O(n + e) (each edge/node processed once with memoization).
+Space: O(n + e) for graph + O(n^2) for results.
+
+Code
+class Solution {
+public:
+    vector<int> dfs(int node, unordered_map<int, vector<int>>& adj,
+                    vector<vector<int>>& memo, vector<bool>& done) 
+    {
+        if (done[node]) return memo[node];
+        done[node] = true;
+
+        set<int> st;
+        for (int parent : adj[node]) {
+            st.insert(parent);
+            vector<int> pAnc = dfs(parent, adj, memo, done);
+            st.insert(pAnc.begin(), pAnc.end());
+        }
+        memo[node] = vector<int>(st.begin(), st.end());
+        return memo[node];
+    }
+
+    vector<vector<int>> getAncestors(int n, vector<vector<int>>& edges) {
+        unordered_map<int, vector<int>> adj;
+        for (auto &e : edges) adj[e[1]].push_back(e[0]);
+
+        vector<vector<int>> memo(n);
+        vector<bool> done(n, false);
+
+        for (int i = 0; i < n; i++) dfs(i, adj, memo, done);
+        return memo;
+    }
+};
