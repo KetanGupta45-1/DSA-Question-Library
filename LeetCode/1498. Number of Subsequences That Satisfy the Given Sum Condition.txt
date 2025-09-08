@@ -1,4 +1,4 @@
-🔹 Brute Force Approach
+Brute Force Approach
 ----------------------------------------------------------------------------------------------------
 Explanation
 Generate all possible subsequences of the array using recursion/bitmask.
@@ -37,8 +37,8 @@ public:
 };
 
 
-
-🔹 Optimized Approach (Two Pointers + Precomputation)
+---------------------------------------------------------------------------------------------------------
+Optimized Approach (Two Pointers + Precomputation)
 ---------------------------------------------------------------------------------------------------------
 
 Explanation
@@ -54,7 +54,6 @@ Else (nums[l] + nums[r] > target): move r-- to reduce the sum.
 Continue until l > r.
 
 Complexity
-
 Time Complexity: 
 𝑂(𝑛log⁡𝑛) (sorting + two pointers).
 Space Complexity: 
