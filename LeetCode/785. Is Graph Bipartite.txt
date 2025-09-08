@@ -1,51 +1,89 @@
+Brute Force Approach (Check all pairs in each component)
+-------------------------------------------------------------------------------------------------------------------------------------
+
 Explanation
-Use a color array initialized with -1 (unvisited).
-Run DFS starting from each unvisited node, assigning alternating colors (0 and 1) to neighbors.
-If a neighbor already has the same color as the current node, the graph is not bipartite.
-If all connected components can be colored without conflicts, the graph is bipartite.
+For every connected component, perform a DFS/BFS to collect nodes into one set.
+After building the component, check every edge (u, v) inside it: if both u and v are in the same “color group”, return false.
+This requires repeated checks across edges → less efficient.
 
 Time Complexity
-O(V + E) → Each node and edge is visited once in DFS.
-
+O(V * E) → For each component, verifying edges inside.
 Space Complexity
-O(V) → For the color array and recursion stack (in worst case, depth = V).
+O(V) → Store nodes of component.
 
 Code
 class Solution {
 public:
-    bool dfs(vector<vector<int>>& graph, vector<int>& color, int node, int val)
-    {
-        color[node] = val;
-
-        for(auto &neigh : graph[node])
-        {
-            if(color[neigh] == color[node])
-                return false;
-            
-            if(color[neigh] == -1)
-            {
-                if(dfs(graph, color, neigh, 1 - color[node]) == false)
-                    return false;
-            }
-        }
-
-        return true;  
-    }
-    
-    bool isBipartite(vector<vector<int>>& graph) 
-    {
+    bool brute(vector<vector<int>>& graph) {
         int n = graph.size();
         vector<int> color(n, -1);
 
-        for(int i = 0; i < n; i++)
-        {
-            if(color[i] == -1)
-            {
-                if(dfs(graph, color, i, 0) == false)
-                    return false;
+        for(int start = 0; start < n; start++) {
+            if(color[start] != -1) continue;
+            queue<int> q;
+            q.push(start);
+            color[start] = 0;
+            while(!q.empty()) {
+                int u = q.front(); q.pop();
+                for(int v : graph[u]) {
+                    if(color[v] == -1) {
+                        color[v] = 1 - color[u];
+                        q.push(v);
+                    }
+                }
             }
         }
 
+        // check every edge
+        for(int u = 0; u < n; u++) {
+            for(int v : graph[u]) {
+                if(color[u] == color[v]) return false;
+            }
+        }
+        return true;
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+🟠 Optimized Approach (DFS with coloring)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Maintain a color array initialized with -1.
+Start DFS from each unvisited node.
+Assign a color (0/1) and try to assign the opposite color to all its neighbors.
+If a neighbor already has the same color as the current node, return false.
+If all nodes can be colored without conflict, the graph is bipartite.
+
+Time Complexity
+O(V + E) → Each node and edge is processed once.
+Space Complexity
+O(V) → Color array + recursion stack (worst case depth = V).
+
+Code
+class Solution {
+public:
+    bool dfs(vector<vector<int>>& graph, vector<int>& color, int node, int val) {
+        color[node] = val;
+        for(int neigh : graph[node]) {
+            if(color[neigh] == color[node]) return false;
+            if(color[neigh] == -1) {
+                if(!dfs(graph, color, neigh, 1 - color[node]))
+                    return false;
+            }
+        }
+        return true;
+    }
+    
+    bool isBipartite(vector<vector<int>>& graph) {
+        int n = graph.size();
+        vector<int> color(n, -1);
+        for(int i = 0; i < n; i++) {
+            if(color[i] == -1) {
+                if(!dfs(graph, color, i, 0))
+                    return false;
+            }
+        }
         return true;
     }
 };
