@@ -1,47 +1,97 @@
+Brute Force Approach
+-------------------------------------------------------------------------------------------------------------------------------------
+
 Explanation
-Use DFS traversal to process subtrees and collect distances of leaf nodes.
-A leaf node directly returns {1} meaning distance 1 from itself.
-At each parent node, compare all distances from the left and right subtree → if l + r <= distance, count it as a good leaf pair.
-Pass updated distances (child_distance + 1) upward to the parent for further checks.
+Collect all leaf nodes in a list using DFS.
+For every pair of leaves (u, v), compute the distance between them using LCA (Lowest Common Ancestor).
+If the distance ≤ given d, increment the count.
 
 Complexity
-Time: O(n * d²) in worst case (for each node, distances from left × right subtrees compared).
-Space: O(h + d) → recursion stack (h = tree height) + distance storage (d = max allowed distance).
+Time: O(L² * h) → L = number of leaves, h = tree height. Each distance computation may take O(h).
+Space: O(h + L) → recursion stack + leaf storage.
+
+Code
+class Solution {
+public:
+    void getLeaves(TreeNode* root, vector<TreeNode*>& leaves) {
+        if(!root) return;
+        if(!root->left && !root->right) {
+            leaves.push_back(root);
+            return;
+        }
+        getLeaves(root->left, leaves);
+        getLeaves(root->right, leaves);
+    }
+
+    int getDist(TreeNode* root, TreeNode* a, TreeNode* b) {
+        if(!root || root == a || root == b) return 0;
+        if(a->val < root->val && b->val < root->val)
+            return 1 + getDist(root->left, a, b);
+        if(a->val > root->val && b->val > root->val)
+            return 1 + getDist(root->right, a, b);
+        return 1 + getDist(root->left, a, a) + getDist(root->right, b, b);
+    }
+
+    int countPairs(TreeNode* root, int distance) {
+        vector<TreeNode*> leaves;
+        getLeaves(root, leaves);
+        int n = leaves.size(), ans = 0;
+
+        for(int i = 0; i < n; i++) {
+            for(int j = i+1; j < n; j++) {
+                int d = getDist(root, leaves[i], leaves[j]);
+                if(d <= distance) ans++;
+            }
+        }
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Optimized DFS Approach
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Use DFS recursion to compute distances of leaf nodes relative to each node.
+A leaf returns {1} meaning distance 1 from itself.
+For each node, compare all distances from left and right subtrees → if l + r <= distance, count it as a good leaf pair.
+Return updated distances (child_distance + 1) upward so parents can process pairs.
+
+Complexity
+Time: O(n * d²) → each node compares left × right subtree distances (≤ d).
+Space: O(h + d) → recursion stack + distance storage.
 
 Code
 class Solution {
 public:
     vector<int> solve(TreeNode* root, int distance, int &goodLeafNodes) {
-        if(!root) {
+        if(!root)
             return {0};
-        }
 
-        if(root->left == NULL && root->right == NULL) {
+        if(!root->left && !root->right)
             return {1};
-        }
 
         auto left_d  = solve(root->left, distance, goodLeafNodes);
         auto right_d = solve(root->right, distance, goodLeafNodes);
 
-        for(int &l : left_d) {
-            for(int &r : right_d) {
-                if((l != 0 && r != 0) && l + r <= distance) 
+        for(int &l : left_d) 
+        {
+            for(int &r : right_d) 
+            {
+                if(l != 0 && r != 0 && l + r <= distance)
                     goodLeafNodes++;
             }
         }
 
         vector<int> curr_d;
-        for(int &ld : left_d) {
-            if(ld != 0 && ld + 1 <= distance) {
+        for(int &ld : left_d)
+            if(ld != 0 && ld + 1 <= distance)
                 curr_d.push_back(ld+1);
-            }
-        }
 
-        for(int &rd : right_d) {
-            if(rd != 0 && rd+1 <= distance) {
+        for(int &rd : right_d)
+            if(rd != 0 && rd + 1 <= distance)
                 curr_d.push_back(rd+1);
-            }
-        }
 
         return curr_d;
     }
