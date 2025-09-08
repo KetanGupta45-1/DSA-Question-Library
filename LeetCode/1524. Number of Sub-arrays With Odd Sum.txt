@@ -1,40 +1,64 @@
-Explanation
-Use a prefix sum approach to track the cumulative sum of elements.
-Maintain counts of even and odd prefix sums encountered so far.
+Brute Force
+-------------------------------------------------------------------------------------------------------------------------------------
 
-For each new prefix sum:
-If it’s even, the number of odd subarrays ending here equals the count of previous odd prefix sums.
-If it’s odd, the number of odd subarrays ending here equals the count of previous even prefix sums.
-Accumulate these counts modulo 1e9+7 to get the final answer.
+Explanation
+Iterate over all possible subarrays (i, j).
+For each subarray, calculate its sum.
+If the sum is odd, increment the answer.
 
 Complexity
-Time: O(n) → single pass over the array.
-Space: O(1) → only a few counters used.
+Time: O(n²) → checking all subarrays.
+Space: O(1) → no extra space.
+
+Code
+class Solution {
+public:
+    int numOfSubarrays(vector<int>& arr) {
+        int mod = 1e9 + 7, ans = 0;
+        int n = arr.size();
+        for(int i = 0; i < n; i++) {
+            int sum = 0;
+            for(int j = i; j < n; j++) {
+                sum += arr[j];
+                if(sum % 2 != 0) ans = (ans + 1) % mod;
+            }
+        }
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Optimized (Prefix Sum Parity)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Use prefix sum parity to determine subarray odd/even sums.
+Maintain counts of even and odd prefix sums.
+If current prefix is even → add previous odd count.
+If current prefix is odd → add previous even count.
+Update counters and accumulate result modulo 1e9+7.
+
+Complexity
+Time: O(n) → single pass.
+Space: O(1) → only counters stored.
 
 Code
 class Solution {
 public:
     int numOfSubarrays(vector<int>& arr) {
         int mod = 1e9 + 7;
-        int ans = 0;
-        int odd = 0, even = 1;  
-        int prefix_sum = 0;
-
-        for (int num : arr) 
-        {
-            prefix_sum += num;
-            if (prefix_sum % 2 == 0) 
-            {
+        int ans = 0, odd = 0, even = 1, prefix = 0;
+        for(int num : arr) {
+            prefix += num;
+            if(prefix % 2 == 0) {
                 ans = (ans + odd) % mod;
                 even++;
-            } 
-            else 
-            {
+            } else {
                 ans = (ans + even) % mod;
                 odd++;
             }
         }
-
         return ans;
     }
 };
