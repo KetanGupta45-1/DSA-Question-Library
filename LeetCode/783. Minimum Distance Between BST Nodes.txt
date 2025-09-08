@@ -1,35 +1,65 @@
+Brute Force
+-------------------------------------------------------------------------------------------------------------------------------------
+
 Explanation
-Perform an inorder traversal of the BST to get nodes in sorted order.
-Keep track of the previous node visited to calculate the difference with the current node.
-Update minidiff whenever a smaller difference is found.
-Return minidiff after traversal is complete.
+Do an inorder traversal to collect all node values into a vector (sorted order).
+Scan the vector once and take the minimum difference of adjacent values.
+Return that minimum difference.
 
 Complexity
-Time: O(n) → each node is visited once.
-Space: O(h) → recursion stack space (h = height of the BST).
+Time: O(n)
+Space: O(n)
 
 Code
 class Solution {
 public:
-  void inorder(TreeNode* root, TreeNode*& prev, int& minidiff)
-  {
-      if(root == nullptr)
-          return;
+    void inorder(TreeNode* root, vector<int>& v) {
+        if(!root) return;
+        inorder(root->left, v);
+        v.push_back(root->val);
+        inorder(root->right, v);
+    }
 
-      inorder(root->left, prev, minidiff);
+    int minDiffInBST(TreeNode* root) {
+        vector<int> v;
+        inorder(root, v);
+        int ans = INT_MAX;
+        for(int i = 1; i < (int)v.size(); i++)
+            ans = min(ans, v[i] - v[i-1]);
+        return ans;
+    }
+};
 
-      if(prev != nullptr)
-          minidiff = min(minidiff, root->val - prev->val);
-      
-      prev = root;
 
-      inorder(root->right, prev, minidiff);
-  }
+-------------------------------------------------------------------------------------------------------------------------------------
+Optimized
+-------------------------------------------------------------------------------------------------------------------------------------
 
-  int minDiffInBST(TreeNode* root) {
-      TreeNode* prev = nullptr;
-      int minidiff = INT_MAX;
-      inorder(root, prev, minidiff);
-      return minidiff;
-  }
+Explanation
+Perform inorder traversal without storing all values.
+Keep a prev pointer to the previously visited node.
+At each node, update minidiff with node->val - prev->val.
+Traverse the whole tree and return minidiff.
+
+Complexity
+Time: O(n)
+Space: O(h)
+
+Code
+class Solution {
+public:
+    void inorder(TreeNode* root, TreeNode*& prev, int& minidiff) {
+        if(!root) return;
+        inorder(root->left, prev, minidiff);
+        if(prev) minidiff = min(minidiff, root->val - prev->val);
+        prev = root;
+        inorder(root->right, prev, minidiff);
+    }
+
+    int minDiffInBST(TreeNode* root) {
+        TreeNode* prev = nullptr;
+        int minidiff = INT_MAX;
+        inorder(root, prev, minidiff);
+        return minidiff;
+    }
 };
