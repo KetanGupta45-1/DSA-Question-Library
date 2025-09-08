@@ -1,27 +1,55 @@
+Brute Force
+-------------------------------------------------------------------------------------------------------------------------------------
 Explanation
-Traverse the array from right to left.
-Use a stack to keep track of the maximum element seen so far.
-For each element, the top of the stack is the next greatest element to its right (or -1 if none).
-Update the stack with the current element if it is greater than the top.
+For each index i, scan all elements to its right (i+1 … n-1).Find the maximum among them.
+If no elements on the right, replace with -1.
+Store results in an output array.
 
-Time Complexity: O(n)
-Space Complexity: O(n)
+Complexity
+Time: O(n²) → each index scans the remaining elements.
+Space: O(1) → output array only.
 
 Code
 class Solution {
 public:
     vector<int> replaceElements(vector<int>& arr) {
-        stack<int> st;
-        st.push(-1);
         int n = arr.size();
         vector<int> ans(n);
-
-        for(int i = n - 1; i >= 0; i--) {   
-            ans[i] = st.top();
-            if(arr[i] > st.top())
-                st.push(arr[i]);
+        for(int i = 0; i < n; i++) {
+            int mx = -1;
+            for(int j = i+1; j < n; j++)
+                mx = max(mx, arr[j]);
+            ans[i] = mx;
         }
+        return ans;
+    }
+};
 
+-------------------------------------------------------------------------------------------------------------------------------------
+Optimized (Stack / Running Maximum)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Traverse from right to left, keeping track of the maximum element seen so far.
+At each index, assign this maximum as the answer.
+Update the running maximum if the current element is larger.
+No nested loop needed.
+
+Complexity
+Time: O(n) → single traversal.
+Space: O(1) → only variables, no extra arrays (besides output).
+
+Code
+class Solution {
+public:
+    vector<int> replaceElements(vector<int>& arr) {
+        int n = arr.size();
+        vector<int> ans(n);
+        int mx = -1;
+        for(int i = n-1; i >= 0; i--) {
+            ans[i] = mx;
+            mx = max(mx, arr[i]);
+        }
         return ans;
     }
 };
