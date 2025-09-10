@@ -1,19 +1,55 @@
-Explanation
-Use a stack to perform iterative preorder traversal.
-Push the root node onto the stack to start.
-In each iteration, pop a node, record its value, then push right child first, then left child to maintain preorder order.
-Repeat until the stack is empty.
+Recursion-based Preorder Traversal
+-------------------------------------------------------------------------------------------------
+
+Explanation (4 points)
+Visit the current node first (Root).
+Recurse into the left subtree.
+Recurse into the right subtree.
+Collect visited values in a vector.
 
 Complexity
-Time: O(n) → each node is visited once.
-Space: O(h) → stack space, where h is the height of the tree.
+Time: O(n) → each node visited once.
+Space: O(h) recursion stack.
+
+Code
+class Solution {
+public:
+    void preorder(TreeNode* root, vector<int>& ans)
+    {
+        if(!root) return;
+        ans.push_back(root->val);
+        preorder(root->left, ans);
+        preorder(root->right, ans);
+    }
+
+    vector<int> preorderTraversal(TreeNode* root)
+    {
+        vector<int> ans;
+        preorder(root, ans);
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+b) Iterative (Stack-based)
+-------------------------------------------------------------------------------------------------
+
+Explanation (4 points)
+Use a stack to simulate recursion.
+Push the root node onto the stack.
+Pop a node, visit it, then push its right child first, then left child (so left is processed first).
+Repeat until stack is empty.
+
+Complexity
+Time: O(n)
+Space: O(h) stack space.
 
 Code
 class Solution {
 public:
     vector<int> preorderTraversal(TreeNode* root) {
-        if(root == nullptr)
-            return {};
+        if(!root) return {};
 
         vector<int> ans;
         stack<TreeNode*> st;
@@ -25,11 +61,63 @@ public:
             st.pop();
             ans.push_back(node->val);
 
-            if(node->right)
-                st.push(node->right);
-            if(node->left)
-                st.push(node->left);
+            if(node->right) st.push(node->right);
+            if(node->left)  st.push(node->left);
         }
         return ans;
     }       
+};
+
+
+-------------------------------------------------------------------------------------------------
+Morris Preorder Traversal 
+-------------------------------------------------------------------------------------------------
+
+Explanation
+If the current node has no left child, visit it and move right.
+If it has a left child, find the inorder predecessor of current.
+If predecessor’s right is nullptr, create a temporary link to current, visit current, move left.
+If predecessor’s right is current, restore it (nullptr) and move right.
+This gives preorder order without stack/recursion.
+
+Complexity
+Time: O(n) (each edge visited ≤ 2 times).
+Space: O(1) (no recursion/stack).
+
+Code
+class Solution {
+public:
+    vector<int> preorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        TreeNode* curr = root;
+
+        while(curr)
+        {
+            if(!curr->left)
+            {
+                ans.push_back(curr->val);
+                curr = curr->right;
+            }
+            else
+            {
+                TreeNode* pred = curr->left;
+                while(pred->right && pred->right != curr)
+                    pred = pred->right;
+
+                if(!pred->right)
+                {
+                    ans.push_back(curr->val); // visit before going left
+                    pred->right = curr;
+                    curr = curr->left;
+                }
+                else
+                {
+                    pred->right = nullptr;
+                    curr = curr->right;
+                }
+            }
+        }
+
+        return ans;
+    }
 };
