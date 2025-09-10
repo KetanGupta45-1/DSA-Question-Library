@@ -1,12 +1,49 @@
-Explanation
-Use a stack to simulate recursion for inorder traversal.
-Traverse to the leftmost node, pushing all nodes onto the stack.
-Pop the top node, add its value to the result, then move to its right child.
-Repeat until both the stack is empty and the current node is nullptr.
+Recursion-based Inorder Traversal
+-------------------------------------------------------------------------------------------------
+
+Explanation 
+Traverse tree in Left → Root → Right order using recursion.
+Base case: return if the node is nullptr.
+Recurse into the left subtree, visit the node, recurse into the right subtree.
+Collect visited values into a vector.
 
 Complexity
-Time: O(n) → each node is visited once.
-Space: O(h) → stack space, where h is the height of the tree.
+Time: O(n) (visit every node once).
+Space: O(h) recursion stack (h = tree height).
+
+Code
+class Solution {
+public:
+    void inorder(TreeNode* root, vector<int>& ans)
+    {
+        if(!root) return;
+        inorder(root->left, ans);
+        ans.push_back(root->val);
+        inorder(root->right, ans);
+    }
+
+    vector<int> inorderTraversal(TreeNode* root)
+    {
+        vector<int> ans;
+        inorder(root, ans);
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Iterative (Stack-based) Inorder Traversal
+-------------------------------------------------------------------------------------------------
+
+Explanation 
+Use a stack to simulate recursion.
+Push nodes while moving left until the leftmost node is reached.
+Pop, visit, and then go to the right child.
+Repeat until stack is empty and current node is nullptr.
+
+Complexity
+Time: O(n)
+Space: O(h) (stack).
 
 Code
 class Solution {
@@ -16,9 +53,9 @@ public:
         vector<int> ans;
         TreeNode* node = root;
 
-        while(node != nullptr || !st.empty())
+        while(node || !st.empty())
         {
-            while(node != nullptr)
+            while(node)
             {
                 st.push(node);
                 node = node->left;
@@ -28,6 +65,62 @@ public:
             st.pop();
             ans.push_back(node->val);
             node = node->right;
+        }
+
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Morris Traversal 
+-------------------------------------------------------------------------------------------------
+
+Explanation 
+Avoid stack/recursion by creating temporary links to predecessors.
+For each node:
+If no left child → visit it, move right.
+If left child exists → find its inorder predecessor.
+If predecessor’s right is nullptr, set it to current and move left.
+If predecessor’s right is current, restore it (nullptr), visit current, move right.
+This ensures O(1) extra space without losing inorder order.
+
+Complexity
+Time: O(n) (each edge visited at most twice).
+Space: O(1) (no stack/recursion).
+
+Code
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        TreeNode* curr = root;
+
+        while(curr)
+        {
+            if(!curr->left)
+            {
+                ans.push_back(curr->val);
+                curr = curr->right;
+            }
+            else
+            {
+                TreeNode* pred = curr->left;
+                while(pred->right && pred->right != curr)
+                    pred = pred->right;
+
+                if(!pred->right)
+                {
+                    pred->right = curr;
+                    curr = curr->left;
+                }
+                else
+                {
+                    pred->right = nullptr;
+                    ans.push_back(curr->val);
+                    curr = curr->right;
+                }
+            }
         }
 
         return ans;

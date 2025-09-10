@@ -1,9 +1,41 @@
+Inorder Based
+-------------------------------------------------------------------------------------------------
+Explanation (4 bullets)
+Each node must lie within a valid range (min, max).
+Left child: max bound becomes parent’s value.
+Right child: min bound becomes parent’s value.
+If any node violates the range, return false; otherwise recurse down.
+
+Complexity
+Time: O(n) → each node visited once.
+Space: O(h) recursion stack (h = tree height, O(log n) for balanced, O(n) for skewed).
+
+Code
+class Solution {
+public:
+    bool check(TreeNode* root, long long mini, long long maxi)
+    {
+        if(!root) return true;
+        if(root->val <= mini || root->val >= maxi) return false;
+        return check(root->left, mini, root->val) && check(root->right, root->val, maxi);
+    }
+
+    bool isValidBST(TreeNode* root) 
+    {
+        return check(root, LLONG_MIN, LLONG_MAX);
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Stack Based Approach
+-------------------------------------------------------------------------------------------------
+
 Explanation
-You recursively check whether each node’s value lies within its valid range:
-For the left child, the max allowed value is the parent’s value.
-For the right child, the min allowed value is the parent’s value.
-If any node violates these bounds, return false.
-You use long for bounds (LONG_MIN, LONG_MAX) to safely handle cases where the node value equals INT_MIN or INT_MAX.
+Use a stack to simulate inorder traversal (Left → Root → Right).
+Keep track of the previous node’s value visited.
+If the current node’s value is ≤ previous, the BST property is violated → return false.
+If traversal finishes without violations, return true.
 
 Complexity
 Time: O(n) → each node is visited once.
