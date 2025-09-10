@@ -1,13 +1,47 @@
+Brute Force
+-------------------------------------------------------------------------------------------------
+
 Explanation
-Maintain a prefix sum as you iterate through the array.
-Use a hash map to store the frequency of each prefix sum encountered so far.
-For each new prefix sum prefix_sum, check if prefix_sum - k exists in the map:
-If yes, it means there’s a subarray ending at current index with sum k.
-Increment the count accordingly and update the map with the current prefix sum.
+Iterate over all possible subarrays using two loops.
+For each subarray, compute its sum and check if it equals k.
+Increment count whenever a valid subarray is found.
 
 Complexity
-Time: O(n) → single pass through the array.
-Space: O(n) → for storing prefix sums in the map.
+Time: O(n^2) → double loop over subarrays.
+Space: O(1) → no extra structures.
+
+Code
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        int n = nums.size();
+        int count = 0;
+
+        for(int i = 0; i < n; i++) {
+            int sum = 0;
+            for(int j = i; j < n; j++) {
+                sum += nums[j];
+                if(sum == k) count++;
+            }
+        }
+
+        return count;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Optimised
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Maintain a prefix sum as you iterate through the array.
+Use a hashmap to store the frequency of each prefix sum encountered so far.
+For each prefix sum, check if prefix_sum - k exists; if yes, add its frequency to the count.
+
+Complexity
+Time: O(n) → single pass.
+Space: O(n) → hashmap stores prefix sums.
 
 Code
 class Solution {
@@ -19,14 +53,11 @@ public:
         map[0] = 1;
         int prefix_sum = 0;
 
-        for(int i = 0; i < n; i++)
-        {
+        for(int i = 0; i < n; i++) {
             prefix_sum += nums[i];
             int rem = prefix_sum - k;
 
-            if(map.count(rem))
-                count += map[rem];
-            
+            if(map.count(rem)) count += map[rem];
             map[prefix_sum]++;
         }
 
