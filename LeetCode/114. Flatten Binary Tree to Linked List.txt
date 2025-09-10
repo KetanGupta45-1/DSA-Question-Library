@@ -1,28 +1,132 @@
-Explanation
-Traverse the tree in reverse preorder (right → left → root).
-Keep track of the previously visited node (prev).
-For each node:
-Set its right pointer to prev.
-Set its left pointer to nullptr.
-Update prev = root.
-This ensures nodes are linked in the required order (root → left → right).
+Approach 1: Recursive (DFS Preorder)
+-------------------------------------------------------------------------------------------------
 
-⏱️ Complexity
-Time: O(n) — each node visited once.
-Space: O(h) recursion stack (h = height of tree).
+We flatten the left and right subtrees, then reattach them:
+Flatten left and right recursively.
+Save the right subtree.
+Move left subtree to right.
+Append saved right subtree.
 
+Complexity
+Time: O(n²) in worst case (because of traversing to the rightmost node each time).
+Space: O(h) for recursion (h = tree height).
+
+Code
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        if(!root) return;
+
+        flatten(root->left);
+        flatten(root->right);
+
+        TreeNode* temp = root->right;
+        root->right = root->left;
+        root->left = nullptr;
+
+        TreeNode* curr = root;
+        while(curr->right) curr = curr->right;
+        curr->right = temp;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Recursive (better)
+-------------------------------------------------------------------------------------------------
+
+Instead of repeatedly searching for the rightmost node, keep track of the last processed node (prev) in a reverse preorder traversal (right → left → root).
+
+Complexity
+Time: O(n) (each node processed once).
+Space: O(h) recursion stack.
+
+Code
 class Solution {
 public:
     TreeNode* prev = nullptr;
     void flatten(TreeNode* root) {
-        if(!root)
-            return;
+        if(!root) return;
 
         flatten(root->right);
         flatten(root->left);
 
-        root->left = nullptr;
         root->right = prev;
+        root->left = nullptr;
         prev = root;
     }
 };
+
+
+-------------------------------------------------------------------------------------------------
+Approach 3: Stack Iterative
+-------------------------------------------------------------------------------------------------
+
+Simulates preorder traversal with an explicit stack:
+Push root.
+Pop top, push right then left
+Set node->right = stack.top().
+Nullify node->left.
+
+Complexity
+Time: O(n).
+Space: O(n) (stack).
+
+Code
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        if(!root) return;
+
+        stack<TreeNode*> st;
+        st.push(root);
+
+        while(!st.empty()) {
+            TreeNode* node = st.top();
+            st.pop();
+
+            if(node->right) st.push(node->right);
+            if(node->left) st.push(node->left);
+
+            node->left = nullptr;
+            if(!st.empty())
+                node->right = st.top();
+        }
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Approach 4: Morris Traversal (Threaded Linking, O(1) space)
+-------------------------------------------------------------------------------------------------
+
+We reuse the tree itself, no recursion/stack:
+For each node, if it has a left child:
+Find rightmost node of left subtree.
+Link its right to current node’s right.
+Move left subtree to right.
+Set left = nullptr.
+Move to right.
+
+Complexity
+Time: O(n) (each edge visited at most twice).
+Space: O(1) (in-place).
+
+Code
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        TreeNode* curr = root;
+        while(curr) {
+            if(curr->left) {
+                TreeNode* prev = curr->left;
+                while(prev->right) prev = prev->right;
+                prev->right = curr->right;
+                curr->right = curr->left;
+                curr->left = nullptr;
+            }
+            curr = curr->right;
+        }
+    }
+};
+
