@@ -1,0 +1,60 @@
+BFS Approach (Level Order Traversal)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Traverse level by level using a queue.
+The first time we encounter a leaf node (no left & right), that level is the minimum depth.
+Return immediately when the first leaf is found → ensures minimum.
+
+Complexity
+TC: O(n) → each node visited once.
+SC: O(n) → queue can hold up to n/2 nodes in worst case (last level).
+
+Code (BFS)
+class Solution {
+public:
+    int minDepth(TreeNode* root) {
+        if(!root) return 0;
+        queue<TreeNode*> q;
+        q.push(root);
+        int depth = 1;
+
+        while(!q.empty()) {
+            int size = q.size();
+            while(size--) {
+                TreeNode* node = q.front();
+                q.pop();
+                if(!node->left && !node->right) return depth;
+                if(node->left) q.push(node->left);
+                if(node->right) q.push(node->right);
+            }
+            depth++;
+        }
+        return depth;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+DFS Approach (Recursion)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use recursion to explore left and right subtree.
+Base case: if node is null, depth is 0.
+If one child is missing, return depth through the other child only (to avoid counting null path).
+
+Complexity
+TC: O(n) → every node visited once.
+SC: O(h) → recursion stack height = tree height (h = log n for balanced, n for skewed).
+
+Code (DFS)
+class Solution {
+public:
+    int minDepth(TreeNode* root) {
+        if(!root) return 0;
+        if(!root->left) return 1 + minDepth(root->right);
+        if(!root->right) return 1 + minDepth(root->left);
+        return 1 + min(minDepth(root->left), minDepth(root->right));
+    }
+};
