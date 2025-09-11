@@ -1,0 +1,183 @@
+Approach 1: Brute Force (Try all 4-point combinations)
+-------------------------------------------------------------------------------------------------------------------
+
+Idea
+A rectangle is defined by 4 corner points: bottom-left, top-left, bottom-right, top-right.
+Try all possible quadruplets (i, j, k, l) of points.
+For each quadruplet:Check if they can form a valid axis-aligned rectangle.
+Compute its area.
+Ensure no other given points lie inside the rectangle.
+Keep track of the maximum area.
+
+Steps
+Pick 4 points.
+Sort them to align as corners (BL, TL, BR, TR).Validate if they form a rectangle.
+Compute area.
+Reject if any other point lies inside.
+Update max area.
+
+Complexity
+TC: O(n^4 * log4) for choosing 4 points and sorting them (log4 negligible → O(n^4)).
+SC: O(1) extra space.
+
+Code (Brute Force)
+class Solution {
+public:
+    int calculateArea(vector<vector<int>>& corners) {
+        vector<int> bl = corners[0], tl = corners[1];
+        vector<int> br = corners[2], tr = corners[3];
+
+        if (bl[0] != tl[0] || br[0] != tr[0]) return -1;
+        if (bl[1] != br[1] || tl[1] != tr[1]) return -1;
+
+        return abs(bl[0] - br[0]) * abs(tl[1] - bl[1]);
+    }
+
+    bool hasInternalPoints(vector<vector<int>>& points, vector<vector<int>>& rect) {
+        vector<int> bl = rect[0], tl = rect[1];
+        vector<int> br = rect[2], tr = rect[3];
+
+        for (auto& p : points) {
+            if (p == bl || p == tl || p == br || p == tr) continue;
+            int x = p[0], y = p[1];
+            if (x >= bl[0] && x <= br[0] && y >= bl[1] && y <= tl[1]) return true;
+        }
+        return false;
+    }
+
+    int maxRectangleArea(vector<vector<int>>& points) {
+        int maxArea = -1, n = points.size();
+        if (n < 4) return maxArea;
+
+        for (int i = 0; i < n; i++)
+            for (int j = i + 1; j < n; j++)
+                for (int k = j + 1; k < n; k++)
+                    for (int l = k + 1; l < n; l++) {
+                        vector<vector<int>> rect = {points[i], points[j], points[k], points[l]};
+                        sort(rect.begin(), rect.end());
+                        int area = calculateArea(rect);
+                        if (area == -1 || hasInternalPoints(points, rect)) continue;
+                        maxArea = max(maxArea, area);
+                    }
+
+        return maxArea;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------------------------
+Optimized (Use diagonals)
+-------------------------------------------------------------------------------------------------------------------
+
+Idea
+Instead of trying all quadruplets, notice:
+A rectangle is uniquely determined by its two diagonal points (bottom-left & top-right).
+If those exist, the other two (top-left & bottom-right) can be checked quickly.
+Iterate over pairs of points, treat them as diagonally opposite corners.
+Check if the other two corners exist in the set.
+Ensure no internal points inside rectangle.
+Compute area.
+
+Steps
+Insert all points into a hash set for O(1) lookup.
+Iterate over pairs (p1, p2).
+If they can be diagonals, check if (x1, y2) and (x2, y1) exist.
+Validate rectangle + no internal points.
+Compute area and update max.
+
+Complexity
+TC: O(n^2 * n) = O(n^3) (pair selection + internal check).
+SC: O(n) for storing points in set.
+
+Code (Optimized with diagonals)
+class Solution {
+public:
+    int maxRectangleArea(vector<vector<int>>& points) {
+        int n = points.size();
+        if (n < 4) return -1;
+
+        set<pair<int,int>> st;
+        for (auto& p : points) st.insert({p[0], p[1]});
+
+        int maxArea = -1;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int x1 = points[i][0], y1 = points[i][1];
+                int x2 = points[j][0], y2 = points[j][1];
+
+                if (x1 == x2 || y1 == y2) continue; // must be diagonal
+                if (st.count({x1, y2}) && st.count({x2, y1})) {
+                    int area = abs(x1 - x2) * abs(y1 - y2);
+
+                    bool hasInside = false;
+                    for (auto& p : points) {
+                        if ((p[0] == x1 && p[1] == y1) || 
+                            (p[0] == x2 && p[1] == y2) || 
+                            (p[0] == x1 && p[1] == y2) || 
+                            (p[0] == x2 && p[1] == y1)) continue;
+
+                        if (p[0] > min(x1, x2) && p[0] < max(x1, x2) &&
+                            p[1] > min(y1, y2) && p[1] < max(y1, y2)) {
+                            hasInside = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasInside) maxArea = max(maxArea, area);
+                }
+            }
+        }
+        return maxArea;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------------------------
+Using Diagonals + Hash Set (No Internal Check)
+-------------------------------------------------------------------------------------------------------------------
+
+Idea
+Rectangle is determined by two diagonal points.
+If diagonals (x1,y1) and (x2,y2) are chosen:
+The other two required corners are (x1,y2) and (x2,y1).
+Using a hash set of all points, we can check existence in O(1).
+Compute area directly if all four corners exist.
+
+Steps
+Insert all points into a hash set for O(1) lookup.
+Loop over all pairs of points (i, j) → O(n²).
+Check if they can form diagonals (x1 ≠ x2 and y1 ≠ y2).
+If yes, check existence of the other two corners.
+If both corners exist, compute area.
+Track maximum area.
+
+Complexity
+TC: O(n²).
+SC: O(n) for storing points.
+
+Code (O(n²), no internal check)
+class Solution {
+public:
+    int maxRectangleArea(vector<vector<int>>& points) {
+        int n = points.size();
+        if (n < 4) return -1;
+
+        set<pair<int,int>> st;
+        for (auto& p : points) st.insert({p[0], p[1]});
+
+        int maxArea = -1;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int x1 = points[i][0], y1 = points[i][1];
+                int x2 = points[j][0], y2 = points[j][1];
+
+                if (x1 == x2 || y1 == y2) continue; // not diagonal
+                if (st.count({x1, y2}) && st.count({x2, y1})) {
+                    int area = abs(x1 - x2) * abs(y1 - y2);
+                    maxArea = max(maxArea, area);
+                }
+            }
+        }
+        return maxArea;
+    }
+};
