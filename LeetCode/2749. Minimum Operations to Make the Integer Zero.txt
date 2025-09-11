@@ -1,0 +1,64 @@
+Brute Force
+-------------------------------------------------------------------------------------------------
+Idea
+Try all possible t values.
+For each t, compute val = num1 - t * num2.
+Check if val can be expressed as the sum of exactly t powers of two.
+Condition check:
+popcount(val) ≤ t ≤ val.
+(Because: you need at least popcount(val) numbers, and at most val numbers if you break into ones).
+
+Steps
+Loop t from 0 up to 60 (enough since 2^60 > 1e18).
+Compute val.
+If valid, return t.
+Otherwise return -1.
+
+Complexity
+TC: O(60) = O(1) (constant loop).
+SC: O(1).
+
+Brute Force Code
+class Solution {
+public:
+    int makeTheIntegerZero(int num1, int num2) {
+        for(int t = 0; t <= 60; t++) {
+            long long val = 1LL * num1 - 1LL * t * num2;
+            if(val < 0) break;
+            int bits = __builtin_popcountll(val);
+            if(bits <= t && t <= val) return t;
+        }
+        return -1;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Optimised
+-------------------------------------------------------------------------------------------------
+Observations
+We only need to check t values starting from popcount(num1) up to at most 60.
+Because if t < popcount(val), it’s impossible anyway.
+Instead of iterating all t from 0, we can:
+Start from t = __builtin_popcountll(num1) and move upward.
+
+Early stop:
+If num1 - t * num2 < 0, further increasing t makes it worse (since subtracting more).
+
+Complexity
+TC: O(log(num1)) at most ≈ 60 iterations (same asymptotically but faster in practice).
+SC: O(1).
+
+Optimised Code
+class Solution {
+public:
+    int makeTheIntegerZero(int num1, int num2) {
+        for(int t = max(1, __builtin_popcountll(num1)); t <= 60; t++) {
+            long long val = 1LL * num1 - 1LL * t * num2;
+            if(val < 0) break;
+            int bits = __builtin_popcountll(val);
+            if(bits <= t && t <= val) return t;
+        }
+        return -1;
+    }
+};
