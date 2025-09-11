@@ -1,0 +1,96 @@
+Brute Force
+-------------------------------------------------------------------------------------------------
+
+Idea
+For each query [l, r], directly iterate over all numbers in the range.
+For each number, compute its contribution step-by-step.
+Accumulate and return result.
+
+Steps
+For query [l, r], loop from i = l to i = r.
+For each i, compute cost (by simulating levels / operations).
+Sum contributions.
+
+Complexity
+TC: O(Q * (r - l)) worst case (very slow if ranges are big).
+SC: O(1).
+
+Brute Force Code
+class Solution {
+public:
+    long long bruteSolve(int l, int r) {
+        long long steps = 0;
+        for(int i = l; i <= r; i++) {
+            int x = i;
+            long long s = 1;
+            while(x > 1) {
+                x = (x + 3) / 4; // simulate moving up a 4-ary tree
+                s++;
+            }
+            steps += s;
+        }
+        return (steps + 1) / 2;
+    }
+
+    long long minOperations(vector<vector<int>>& queries) {
+        long long res = 0;
+        for(auto &q : queries) {
+            int l = q[0], r = q[1];
+            res += bruteSolve(l, r);
+        }
+        return res;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Optimised (Mathematical Grouping)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Numbers are grouped into levels of a 4-ary tree:
+Level 1: [1, 3]
+Level 2: [4, 15]
+Level 3: [16, 63] …
+General: Level s covers [4^(s-1), 4^s - 1].
+Instead of iterating through each number, just count how many from [l, r] fall inside each level.
+Multiply count by level’s step value s.
+Accumulate efficiently.
+
+Steps
+Start from L = 1, s = 1.
+For each level range [L, R] = [4^(s-1), 4^s - 1]:
+Clamp with [l, r].
+Add (count * s) to total steps.
+Move to next level (L *= 4, s++).
+Return (steps+1)/2.
+
+Complexity
+TC: O(Q * log(r)), since there are O(log₄(r)) levels.
+SC: O(1).
+
+Optimised Code
+class Solution {
+public:
+    long long solve(int l, int r) {
+        long long L = 1, s = 1, steps = 0;
+        while(L <= r) {
+            long long R = 4*L - 1;
+            long long start = max(L, (long long)l);
+            long long end = min(R, (long long)r);
+            if(start <= end)
+                steps += (end - start + 1) * s;
+            s++;
+            L *= 4;
+        }
+        return steps;
+    }
+
+    long long minOperations(vector<vector<int>>& queries) {
+        long long res = 0;
+        for(auto &q : queries) {
+            res += (solve(q[0], q[1]) + 1) / 2;
+        }
+        return res;
+    }
+};
