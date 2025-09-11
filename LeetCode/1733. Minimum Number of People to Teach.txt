@@ -1,0 +1,107 @@
+Brute Force (Your Current Solution)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Build all conflict pairs = friendships where the two people do not share any language.
+For each language i (from 1 to n):
+Collect all people in conflict pairs who do not know language i.
+Count how many need to be taught.
+Answer = minimum over all languages.
+
+Complexity
+For each of n languages, scan conflict pairs → worst case O(n * m * L²)
+(where m = friendships, L = max number of languages per person).
+SC: O(m + nL) for storing friendships and language mapping.
+
+Code (Brute Force)
+class Solution {
+public:
+    int minimumTeachings(int n, vector<vector<int>>& languages, vector<vector<int>>& friendships) {
+        int m = languages.size();
+        unordered_map<int, unordered_set<int>> knows;
+        for(int i=0; i<m; i++) 
+            for(int lang : languages[i]) 
+                knows[i+1].insert(lang);
+
+        set<pair<int,int>> conflict_pairs;
+        for(auto &fr : friendships) {
+            int a = fr[0], b = fr[1];
+            bool share = false;
+            for(int l : knows[a]) if(knows[b].count(l)) { share = true; break; }
+            if(!share) {
+                if(a > b) swap(a,b);
+                conflict_pairs.insert({a,b});
+            }
+        }
+
+        if(conflict_pairs.empty()) return 0;
+
+        int ans = INT_MAX;
+        for(int lang=1; lang<=n; lang++) {
+            unordered_set<int> teach;
+            for(auto &p : conflict_pairs) {
+                if(!knows[p.first].count(lang)) teach.insert(p.first);
+                if(!knows[p.second].count(lang)) teach.insert(p.second);
+            }
+            ans = min(ans, (int)teach.size());
+        }
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Optimised
+-------------------------------------------------------------------------------------------------
+
+Key Observations
+Only people in conflict pairs matter.
+→ Others don’t need teaching.
+For each candidate language i, we just need to check how many people in conflict pairs already know it.
+Then the rest must be taught.
+
+Steps
+Collect all people involved in conflict pairs.
+For each language i:
+Count how many of these people already know i.
+People to teach = total conflict people − those who already know.
+Take minimum across all i.
+
+Complexity
+Building conflict set = O(m * L²).
+For each language (up to n), check conflict people.
+Total: O(n * P * L) where P = conflict people count.
+
+Code (Optimised)
+class Solution {
+public:
+    int minimumTeachings(int n, vector<vector<int>>& languages, vector<vector<int>>& friendships) {
+        int m = languages.size();
+        vector<unordered_set<int>> knows(m+1);
+        for(int i=0; i<m; i++)
+            for(int lang : languages[i])
+                knows[i+1].insert(lang);
+
+        unordered_set<int> conflict_people;
+        for(auto &fr : friendships) {
+            int a = fr[0], b = fr[1];
+            bool share = false;
+            for(int l : knows[a]) if(knows[b].count(l)) { share = true; break; }
+            if(!share) {
+                conflict_people.insert(a);
+                conflict_people.insert(b);
+            }
+        }
+
+        if(conflict_people.empty()) return 0;
+
+        int ans = INT_MAX;
+        for(int lang=1; lang<=n; lang++) {
+            int alreadyKnow = 0;
+            for(int p : conflict_people)
+                if(knows[p].count(lang)) alreadyKnow++;
+            ans = min(ans, (int)conflict_people.size() - alreadyKnow);
+        }
+        return ans;
+    }
+};
