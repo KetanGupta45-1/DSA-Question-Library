@@ -1,0 +1,83 @@
+a) Brute Force Approach (Your Code)
+----------------------------------------------------------------------------------------------------
+
+Identify submatrix boundaries
+Given (x, y, k), submatrix spans rows x … x+k-1 and cols y … y+k-1.
+Swap row pairs
+Take row sr from top and row er from bottom of the submatrix.
+Extract their elements into top and bottom vectors.
+Reassign swapped rows
+Put bottom into sr, and top into er.
+Move sr++ and er--.
+Repeat until all row pairs swapped
+If the submatrix has odd height, the middle row remains unchanged.
+
+Time Complexity
+O(k²) (each element of k×k submatrix touched once).
+
+Space Complexity
+O(k) temporary storage for top and bottom.
+
+Code (Brute – your version)
+class Solution {
+public:
+    vector<vector<int>> reverseSubmatrix(vector<vector<int>>& grid, int x, int y, int k) {
+        int sr = x;
+        int er = x + k - 1;
+
+        while(sr <= er) {
+            vector<int> top, bottom;
+            for(int i=y; i<y+k; i++) {
+                top.push_back(grid[sr][i]);
+                bottom.push_back(grid[er][i]);
+            }
+
+            for(int i=y; i<y+k; i++) {
+                grid[sr][i] = bottom[i-y];
+                grid[er][i] = top[i-y];
+            }
+
+            sr++;
+            er--;
+        }
+        return grid;
+    }
+};
+
+
+----------------------------------------------------------------------------------------------------
+b) Optimized Approach (In-place Swaps)
+----------------------------------------------------------------------------------------------------
+
+Avoid extra arrays
+Instead of storing top and bottom, directly swap corresponding elements.
+Two-pointer row approach
+Use sr (start row) and er (end row) within submatrix.
+Column iteration
+For each column j in [y … y+k-1], swap grid[sr][j] and grid[er][j].
+Move pointers
+Increment sr, decrement er after each row swap.
+Stop at middle
+If odd-sized, middle row stays the same automatically.
+
+Time Complexity
+O(k²) (same as brute).
+
+Space Complexity
+O(1) (swaps done in-place, no extra vectors).
+
+Code (Optimized)
+class Solution {
+public:
+    vector<vector<int>> reverseSubmatrix(vector<vector<int>>& grid, int x, int y, int k) {
+        int sr = x, er = x + k - 1;
+        while(sr < er) {
+            for(int j=y; j<y+k; j++) {
+                swap(grid[sr][j], grid[er][j]);
+            }
+            sr++;
+            er--;
+        }
+        return grid;
+    }
+};
