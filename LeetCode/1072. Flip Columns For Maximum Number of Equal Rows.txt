@@ -1,0 +1,104 @@
+a) Brute Force Approach
+----------------------------------------------------------------------------------------------------
+
+Check every possible flip combination
+Each row can be flipped or not (binary choice).
+Transform matrix
+For each choice, flip rows as needed, then normalize rows.
+Count equal rows
+For the transformed matrix, count the maximum number of identical rows.
+Return maximum
+Among all combinations, take the best one.
+
+Time Complexity
+There are 2^𝑛 flip combinations.
+For each combination, processing costs 
+O(n⋅m) (n = rows, m = cols).
+Total = O(2^n*n*m)
+
+Space Complexity
+O(n*m) to store temporary matrix copy.
+
+(Brute Force Code – not practical, just illustrative)
+class Solution {
+public:
+    int maxEqualRowsAfterFlips(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        int m = matrix[0].size();
+        int ans = 0;
+
+        for(int mask=0; mask<(1<<n); mask++) {
+            unordered_map<string,int> freq;
+            for(int i=0; i<n; i++) {
+                vector<int> row = matrix[i];
+                if(mask & (1<<i)) {
+                    for(int j=0; j<m; j++)
+                        row[j] = 1 - row[j];
+                }
+                string s = "";
+                for(int x : row) s += (x+'0');
+                freq[s]++;
+                ans = max(ans, freq[s]);
+            }
+        }
+
+        return ans;
+    }
+};
+
+
+----------------------------------------------------------------------------------------------------
+b) Optimized Approach
+----------------------------------------------------------------------------------------------------
+
+Key observation
+Two rows can be made equal if one is the same as the other OR the bitwise inverse of the other.Normalize row representation
+For each row, build its string form (normal).
+Also compute its flipped form (flipped).
+Use frequency map
+Count frequency of each row string.
+Check both normal + flipped
+For every row, best answer comes from map[normal] + map[flipped].
+Return global maximum
+The result is the largest count among all rows.
+
+Time Complexity
+O(n*m) → Convert each row to string & flipped string.
+Hashmap lookups are O(1) on average.
+Total = O(n*m)
+
+Space Complexity
+O(n*m) for storing row strings in map.
+
+(Optimized Code)
+class Solution {
+public:
+    string get_string(vector<int>& row) {
+        string ans = "";
+        for(int x : row) ans += (x + '0');
+        return ans;
+    }
+
+    string get_invert(string s) {
+        string t = "";
+        for(char c : s) 
+            t += char((1 - (c - '0')) + '0');
+        return t;
+    }
+
+    int maxEqualRowsAfterFlips(vector<vector<int>>& matrix) {
+        unordered_map<string,int> map;
+        for(auto &row : matrix) {
+            string s = get_string(row);
+            map[s]++;
+        }
+
+        int count = 0;
+        for(auto &row : matrix) {
+            string normal = get_string(row);
+            string flipped = get_invert(normal);
+            count = max(count, map[normal] + map[flipped]);
+        }
+        return count;
+    }
+};

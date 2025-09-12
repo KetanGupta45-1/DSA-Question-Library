@@ -1,0 +1,164 @@
+a) Brute Force Approach (Your Code)
+----------------------------------------------------------------------------------------------------
+
+Track corners
+Maintain four pairs: top_left, top_right, bottom_left, bottom_right.
+These represent the current active rectangle boundaries
+Move in spiral
+Start moving right → down → left → up.
+At each corner, update boundaries and rotate the direction.
+Push visited elements
+At each step, push current cell into ans.
+Stop when all visited
+Continue until ans.size() == m × n.
+
+Time Complexity
+O(m × n) (each cell visited once).
+
+Space Complexity
+O(1) extra (just storing corner variables).
+
+Code (Brute Force – your version)
+typedef pair<int,int> p;
+class Solution
+{
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix)
+    {
+        int dir = 0;
+        int m = matrix.size();
+        int n = matrix[0].size();
+        vector<int> ans;
+
+        int i = 0, j = 0;
+
+        p top_left = {0,0};
+        p top_right = {0,n-1};
+        p bottom_left = {m-1,0};
+        p bottom_right = {m-1,n-1};
+
+        while(ans.size() < m*n)
+        {
+            ans.push_back(matrix[i][j]);
+
+            if(dir == 0)
+            {
+                if(j == top_right.second && i == top_right.first)
+                {
+                    auto [x1,y1] = top_left;
+                    auto [x2,y2] = top_right;
+                    top_left = {x1+1,y1};
+                    top_right = {x2+1,y2};
+                    dir = 1;
+                    i++;
+                }
+                else 
+                    j++;
+            }
+            else if(dir == 1)
+            {
+                if(i == bottom_right.first && j == bottom_right.second)
+                {
+                    auto [x1,y1] = bottom_right;
+                    auto [x2,y2] = top_right;
+                    bottom_right = {x1,y1-1};
+                    top_right = {x2,y2-1};
+                    dir = 2;
+                    j--;
+                }
+                else 
+                    i++;
+            }
+
+            else if(dir == 2)
+            {
+                if(i == bottom_left.first && j == bottom_left.second)
+                {
+                    auto [x1,y1] = bottom_left;
+                    auto [x2,y2] = bottom_right;
+                    bottom_left = {x1-1,y1};
+                    bottom_right = {x2-1,y2};
+                    dir = 3;
+                    i--;
+                }
+                else 
+                    j--;
+            }
+
+            else if(dir == 3)
+            {
+                if(i == top_left.first && j == top_left.second)
+                {
+                    auto [x1,y1] = top_left;
+                    auto [x2,y2] = bottom_left;
+                    top_left = {x1,y1+1};
+                    bottom_left = {x2,y2+1};
+                    dir = 0;
+                    j++;
+                }
+                else 
+                    i--;
+            }
+        }
+        
+        return ans;
+    }
+};
+
+
+----------------------------------------------------------------------------------------------------
+b) Optimized Approach (Boundary Shrinking)
+----------------------------------------------------------------------------------------------------
+
+Track four boundaries
+top, bottom, left, right.
+Traverse in order
+Move right across top.
+Move down along right.
+Move left across bottom.
+Move up along left.
+Shrink boundaries
+After each direction, shrink the corresponding boundary.
+Avoid duplicates
+Check top <= bottom and left <= right before traversing bottom/left to prevent overrun.
+Repeat until done
+Continue until all elements are visited.
+
+Time Complexity
+O(m × n) (each element visited once).
+
+Space Complexity
+O(1) extra.
+
+Code (Optimized)
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        int m = matrix.size(), n = matrix[0].size();
+        vector<int> ans;
+        int top = 0, bottom = m-1, left = 0, right = n-1;
+        
+        while(top <= bottom && left <= right) {
+            for(int j=left; j<=right; j++)
+                ans.push_back(matrix[top][j]);
+            top++;
+            
+            for(int i=top; i<=bottom; i++)
+                ans.push_back(matrix[i][right]);
+            right--;
+            
+            if(top <= bottom) {
+                for(int j=right; j>=left; j--)
+                    ans.push_back(matrix[bottom][j]);
+                bottom--;
+            }
+            
+            if(left <= right) {
+                for(int i=bottom; i>=top; i--)
+                    ans.push_back(matrix[i][left]);
+                left++;
+            }
+        }
+        return ans;
+    }
+};
