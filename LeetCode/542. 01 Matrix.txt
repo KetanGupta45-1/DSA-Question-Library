@@ -1,0 +1,95 @@
+DFS 
+-------------------------------------------------------------------------------------------------
+
+A DFS approach to solving the "01 Matrix" problem is generally less efficient than BFS for this specific task because it doesn't guarantee finding the shortest path first. It can lead to visiting cells multiple times and a higher time complexity. It works by exploring as far as possible along each branch before backtracking. For this problem, a dynamic programming (DP) approach with two passes (one forward, one backward) is more akin to the logic of finding the shortest path iteratively, which can be thought of as a form of depth-first traversal but isn't a traditional graph traversal. However, if a standard DFS is used, it often involves recursive calls to explore neighbors.
+Start with a cell containing 1. Perform a DFS traversal from this cell.
+The traversal explores all possible paths to find a 0.
+The distance to the nearest 0 is the length of the shortest path found during the traversal.
+This process is repeated for every cell containing a 1, making it computationally expensive and inefficient.
+
+Time Complexity: O((m⋅n)^2). In the worst case, for each cell containing a 1, the DFS might visit almost all other cells in the matrix, leading to a very high time complexity.
+Space Complexity: O(m⋅n). The space is primarily used by the recursion stack, which in the worst case can be as deep as the number of cells in the matrix.
+
+class Solution {
+public:
+    int m, n;
+    vector<vector<int>> directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    int solve(vector<vector<int>>& mat, int r, int c) {
+        if (r < 0 || r >= m || c < 0 || c >= n || mat[r][c] == -1) {
+            return 1e9;
+        }
+        if (mat[r][c] == 0) {
+            return 0;
+        }
+        int originalValue = mat[r][c];
+        mat[r][c] = -1;
+        int minDistance = 1e9;
+        for (auto& dir : directions) {
+            minDistance = min(minDistance, solve(mat, r + dir[0], c + dir[1]) + 1);
+        }
+        mat[r][c] = originalValue;
+        return minDistance;
+    }
+    vector<vector<int>> updateMatrix(vector<vector<int>>& mat) {
+        m = mat.size();
+        n = mat[0].size();
+        vector<vector<int>> result(m, vector<int>(n));
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (mat[i][j] == 1) {
+                    result[i][j] = solve(mat, i, j);
+                } else {
+                    result[i][j] = 0;
+                }
+            }
+        }
+        return result;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+BFS 
+-------------------------------------------------------------------------------------------------
+
+A multi-source BFS is the optimal approach for this problem. It treats all the 0s as the starting points of the search. The algorithm proceeds layer by layer from all 0s simultaneously, guaranteeing that the first time a 1 is reached, it is via the shortest path.
+Initialize a queue and push all cells with a value of 0 into it.
+Initialize a distance matrix dist with -1 (or a large number) for 1s and 0 for 0s.
+Begin the BFS: while the queue is not empty, dequeue a cell and explore its neighbors.
+For each unvisited neighbor (where dist is -1), update its distance to be 1 plus the current cell's distance and enqueue it.
+
+Time Complexity: O(m⋅n). Each cell is visited and processed at most once.
+Space Complexity: O(m⋅n). The space is used for the queue, which can hold up to all the cells in the worst case, and for the distance matrix.
+
+
+class Solution {
+public:
+    vector<pair<int, int>> directions = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+    vector<vector<int>> updateMatrix(vector<vector<int>>& mat) {
+        int m = mat.size();
+        int n = mat[0].size();
+        queue<pair<int, int>>q;
+        vector<vector<int>>dist(m, vector<int>(n, -1));
+        for(int i=0; i<m; i++) {
+            for(int j=0; j<n; j++) {
+                if(mat[i][j] == 0) {
+                    q.push({i, j});
+                    dist[i][j] = 0;
+                }
+            }
+        }
+        while(!q.empty()) {
+            auto [x, y] = q.front();
+            q.pop();
+            for(auto &dir : directions) {
+                auto [dx, dy] = dir;
+                int nx = x + dx;
+                int ny = y + dy;
+                if(nx >=0 && nx < m && ny >= 0 && ny < n && dist[nx][ny] == -1) {
+                    dist[nx][ny] = dist[x][y] + 1;
+                    q.push({nx, ny});
+                }
+            }
+        }
+        return dist;
+    }
+};
