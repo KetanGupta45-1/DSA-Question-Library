@@ -1,0 +1,87 @@
+🟢 Brute Force
+----------------------------------------------------------------------------------------------------
+
+The idea is to pick each diagonal starting either from the first row or first column, collect elements, sort them, and then place them back. It requires traversing all diagonals separately and handling them one by one.
+
+Time Complexity: O(m*n*log(min(m,n)))
+Space Complexity: O(min(m,n))
+
+Code (yours):
+
+class Solution {
+public:
+    vector<vector<int>> diagonalSort(vector<vector<int>>& mat) {
+        int m = mat.size();
+        int n = mat[0].size();
+        unordered_map<int, vector<int>>diag;
+
+        for(int i=0; i<m; i++)
+        {
+            for(int j=0; j<n; j++)
+                diag[i-j].push_back(mat[i][j]);
+        }
+
+        vector<vector<int>>ans(m, vector<int>(n));
+
+        for(auto &it : diag)
+        {
+            int key = it.first;
+            auto vec = it.second;
+            sort(vec.begin(), vec.end());
+            int i,j;
+
+            if(key == 0)
+                i=0, j=0;
+            else if(key > 0)
+                i = key, j=0;
+            else
+                i=0, j= -key;
+
+            for(int &ele : vec)
+            {
+                ans[i][j] = ele;
+                i++;
+                j++;
+            }
+        }
+
+        return ans;
+    }
+};
+
+
+----------------------------------------------------------------------------------------------------
+🟠 Optimized
+----------------------------------------------------------------------------------------------------
+
+We can use the fact that each diagonal can be uniquely identified by (i-j). Instead of sorting diagonals later, store elements of each diagonal directly in a min-heap (priority queue). While reconstructing the matrix, we pop the smallest available element from the respective diagonal heap, which guarantees sorted order without explicitly sorting again. This avoids separate diagonal traversals and simplifies reinsertion.
+
+Time Complexity: O(m*n*log(min(m,n)))
+Space Complexity: O(m*n) (due to storing all elements in hash + heaps)
+
+Code:
+class Solution {
+public:
+    vector<vector<int>> diagonalSort(vector<vector<int>>& mat) {
+        int m = mat.size();
+        int n = mat[0].size();
+        unordered_map<int, priority_queue<int, vector<int>, greater<int>>> diag;
+
+        for(int i=0; i<m; i++)
+        {
+            for(int j=0; j<n; j++)
+                diag[i-j].push(mat[i][j]);
+        }
+
+        for(int i=0; i<m; i++)
+        {
+            for(int j=0; j<n; j++)
+            {
+                mat[i][j] = diag[i-j].top();
+                diag[i-j].pop();
+            }
+        }
+
+        return mat;
+    }
+};
