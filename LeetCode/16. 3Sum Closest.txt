@@ -1,0 +1,64 @@
+🟢 Brute Force
+-------------------------------------------------------------------------------------------------
+
+Generate all triplets (i,j,k) with i<j<k.
+Compute their sum and track the one closest to target.
+Return the closest sum after checking all triplets.
+
+Time Complexity: O(n³)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    int threeSumClosest(vector<int>& nums, int target) {
+        int n = nums.size();
+        int best_sum = nums[0] + nums[1] + nums[2];
+
+        for(int i=0; i<n; i++) {
+            for(int j=i+1; j<n; j++) {
+                for(int k=j+1; k<n; k++) {
+                    int sum = nums[i] + nums[j] + nums[k];
+                    if(abs(sum - target) < abs(best_sum - target))
+                        best_sum = sum;
+                }
+            }
+        }
+        return best_sum;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+🟠 Optimized (your code)
+-------------------------------------------------------------------------------------------------
+
+Sort the array first.
+Fix one number nums[i], then use two pointers a and b for the rest.
+Calculate sum, update best if closer to target.
+Move pointers inward depending on whether sum > or < target.
+Early exit if exact match is found.
+
+Time Complexity: O(n²)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    int threeSumClosest(vector<int>& nums, int target) {
+        int n = nums.size();
+        sort(nums.begin(), nums.end());
+        int best_sum = nums[0] + nums[1] + nums[2];
+
+        for(int i=0; i<n-2; i++) {
+            if(i > 0 && nums[i] == nums[i-1]) continue;
+            int a = i+1, b = n-1;
+            while(a < b) {
+                int sum = nums[i] + nums[a] + nums[b];
+                if(abs(sum - target) < abs(best_sum - target))
+                    best_sum = sum;
+                if(sum == target) return sum;
+                else if(sum > target) b--;
+                else a++;
+            }
+        }
+        return best_sum;
+    }
+};
