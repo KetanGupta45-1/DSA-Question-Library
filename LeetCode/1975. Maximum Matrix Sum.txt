@@ -1,0 +1,76 @@
+🟢 Brute Force
+-------------------------------------------------------------------------------------------------
+
+Try flipping every subset of negative numbers → simulate all possibilities.
+For each configuration, compute the sum of absolute values.
+Pick the maximum among them.
+
+Time Complexity: O(2^(n*n) * n^2) (exponential)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    long long maxMatrixSum(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        int m = matrix[0].size();
+        long long best = LLONG_MIN;
+        for(int rowMask=0; rowMask < (1<<n); rowMask++) 
+        {
+            for(int colMask=0; colMask < (1<<m); colMask++) 
+            {
+                long long sum = 0;
+                for(int i=0; i<n; i++) 
+                {
+                    for(int j=0; j<m; j++) 
+                    {
+                        int val = matrix[i][j];
+                        if(rowMask & (1<<i)) val = -val;
+                        if(colMask & (1<<j)) val = -val;
+
+                        sum += val;
+                    }
+                }
+
+                best = max(best, sum);
+            }
+        }
+
+        return best;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+🟠 Optimized
+-------------------------------------------------------------------------------------------------
+
+Count total negatives and take absolute sum of all elements.
+Track the smallest absolute value across the matrix.
+If negative count is even → no issue, return total sum.
+If negative count is odd → one element must remain negative, so subtract twice the smallest absolute value.
+
+Time Complexity: O(n^2)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    long long maxMatrixSum(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        int neg_count = 0;
+        long long mini = LLONG_MAX;
+        long long sum = 0;
+
+        for(int i=0; i<n; i++)
+        {
+            for(int j=0; j<n; j++)
+            {
+                if(matrix[i][j] < 0)
+                    neg_count++;
+                mini = min(mini, (long long)abs(matrix[i][j]));
+                sum += abs((long long)matrix[i][j]);
+            }
+        }
+
+        return (neg_count % 2 == 0) ? sum : sum - 2 * mini;
+    }
+};
