@@ -1,0 +1,34 @@
+Alice goes first.
+On each move, a player removes one vowel.
+If no vowels remain, the current player loses.
+That means:
+If the string has at least one vowel, Alice can always remove one and guarantee a win.
+If the string has zero vowels, Alice can’t make a move, so she loses.
+
+So the solution is just:
+class Solution {
+public:
+    bool doesAliceWin(string s) {
+        for(char c : s)
+            if(c=='a'||c=='e'||c=='i'||c=='o'||c=='u')
+                return true;
+        return false;
+    }
+};
+
+
+Complexity: 
+O(n) time
+O(1) space.
+
+
+Why odd and even number of vowels does not matter
+
+case 1 -> ODD Vowels
+====================
+if its odd vowels, then alice will try to expand the window as much as possible so that all vowels are used. So bob wont be having any vowels
+
+case -> 2 EVEN Vowels
+=====================
+if its even vowels, then think of this odd(alice) + even (bob) + odd (alice) = even (same number)
+or easy words-> if alice picks suppose v vowels(odd) then we will have (total_vowels - v) vowles for bob (that number is odd though), so even if bob tries to take max even count, we will have 1 remaining vowel.
