@@ -1,0 +1,79 @@
+🟢 Brute Force
+-------------------------------------------------------------------------------------------------
+
+Enumerate all possible submatrices → pick (r1,c1) as top-left and (r2,c2) as bottom-right.
+For each, compute sum by iterating over all cells inside.
+Count if sum equals target.
+
+Time Complexity: O(m² * n² * m * n) → too slow.
+Space Complexity: O(1)
+
+class Solution {
+public:
+    int numSubmatrixSumTarget(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size(), n = matrix[0].size();
+        int ans = 0;
+
+        for(int r1=0; r1<m; r1++) {
+            for(int c1=0; c1<n; c1++) {
+                for(int r2=r1; r2<m; r2++) {
+                    for(int c2=c1; c2<n; c2++) {
+                        int sum = 0;
+                        for(int i=r1; i<=r2; i++) {
+                            for(int j=c1; j<=c2; j++) {
+                                sum += matrix[i][j];
+                            }
+                        }
+                        if(sum == target) ans++;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+🟠 Optimized (your code)
+-------------------------------------------------------------------------------------------------
+
+Precompute prefix sums row-wise to query submatrix row segments quickly.
+Fix two column boundaries (start_col, end_col) → reduce to a 1D problem across rows.
+Maintain running prefix_sum across rows, use hashmap to count number of times (prefix_sum - target) occurred.
+Accumulate answers.
+
+Time Complexity: O(n² * m)
+Space Complexity: O(m) (hashmap per column pair)
+
+class Solution {
+public:
+    int numSubmatrixSumTarget(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size(), n = matrix[0].size();
+        int ans = 0;
+
+        for(int i=0; i<m; i++) {
+            for(int j=1; j<n; j++)
+                matrix[i][j] += matrix[i][j-1];
+        }
+
+        for(int start_col=0; start_col<n; start_col++) {
+            for(int end_col=start_col; end_col<n; end_col++) {
+                unordered_map<int,int> map;
+                map[0] = 1;
+                int prefix_sum = 0;
+
+                for(int i=0; i<m; i++) {
+                    int row_sum = matrix[i][end_col] - (start_col > 0 ? matrix[i][start_col-1] : 0);
+                    prefix_sum += row_sum;
+
+                    if(map.count(prefix_sum - target))
+                        ans += map[prefix_sum - target];
+
+                    map[prefix_sum]++;
+                }
+            }
+        }
+        return ans;
+    }
+};
