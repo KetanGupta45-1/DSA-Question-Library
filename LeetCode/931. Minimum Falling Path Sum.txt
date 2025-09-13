@@ -1,0 +1,99 @@
+(a) Recursion (Brute Force) – Concept only
+-------------------------------------------------------------------------------------------------
+
+Key points
+Start from any cell in the top row, move down-left, down, or down-right recursively.
+Explore all possible falling paths to the bottom.
+Extremely slow without memoization due to repeated subproblems.
+
+Complexity
+Time: O(3^n) (branching factor 3).
+Space: O(n) recursion stack.
+
+
+-------------------------------------------------------------------------------------------------
+(b) Bottom-Up DP (Tabulation)
+-------------------------------------------------------------------------------------------------
+
+Key points
+Start from second-last row, for each cell add min of the 3 possible moves below (down, left-diagonal, right-diagonal).
+Reuse matrix to store cumulative path sums in-place.
+Final answer = minimum of the top row.
+
+Complexity
+Time:  O(n^2).
+Space: O(1) extra (in-place).
+
+Code (your version):
+class Solution {
+public:
+    int minFallingPathSum(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+
+        for(int i=n-2; i>=0; i--) {
+            for(int j=0; j<matrix[i].size(); j++) {
+                int dright = (j+1 < n) ? matrix[i+1][j+1] : INT_MAX;
+                int dleft = (j-1 >= 0) ? matrix[i+1][j-1] : INT_MAX;
+                int below = matrix[i+1][j];
+
+                matrix[i][j] += min({dright, dleft, below});
+            }
+        }
+
+        int ans = INT_MAX;
+        for(int j=0; j<n; j++)
+            ans = min(ans, matrix[0][j]);
+
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+(c) Top-Down DP (Memoization)
+-------------------------------------------------------------------------------------------------
+
+Key points
+Define recursive state (i, j) = minimum falling path sum starting at (i, j).
+Use memoization (dp[i][j]) to avoid recalculating subproblems.
+Compute results for all top-row cells and return the minimum.
+
+Complexity
+Time: O(n^2).
+Space: O(n^2) for dp + O(n) recursion stack.
+
+Code (your version):
+class Solution {
+public:
+    int n;
+    vector<vector<int>> dp;
+
+    int dfs(vector<vector<int>>& matrix, int cx, int cy) {
+        if(cx == n-1)
+            return matrix[cx][cy];
+
+        if(dp[cx][cy] != -1)
+            return dp[cx][cy];
+
+        int res = dfs(matrix, cx+1, cy);
+
+        if(cy > 0)
+            res = min(res, dfs(matrix, cx+1, cy-1));
+
+        if(cy < n-1)
+            res = min(res, dfs(matrix, cx+1, cy+1));
+
+        return dp[cx][cy] = matrix[cx][cy] + res;
+    }
+
+    int minFallingPathSum(vector<vector<int>>& matrix) {
+        n = matrix.size();
+        dp.assign(n, vector<int>(n, -1));
+        int ans = INT_MAX;
+
+        for(int j=0; j<n; j++)
+            ans = min(ans, dfs(matrix, 0, j));
+
+        return ans;
+    }
+};
