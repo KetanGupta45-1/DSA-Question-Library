@@ -1,0 +1,104 @@
+🔹 1. Recursion (Brute Force)
+-------------------------------------------------------------------------------------------------
+
+Idea
+At each index, choose +nums[i] or -nums[i] and recurse.
+Explore all 2^n possibilities.
+Base case: if sum == target at end → count.
+
+Complexity
+TC: O(2^n) (each element has 2 choices).
+SC: O(n) recursion depth.
+
+Code
+class Solution {
+public:
+    int n, count = 0;
+    void dfs(vector<int>& nums, int target, int i, long long sum)
+    {
+        if(i == n)
+        {
+            if(sum == target) count++;
+            return;
+        }
+        dfs(nums, target, i+1, sum - nums[i]);
+        dfs(nums, target, i+1, sum + nums[i]);
+    }
+    int findTargetSumWays(vector<int>& nums, int target) {
+        n = nums.size();
+        dfs(nums, target, 0, 0);
+        return count;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+🔹 2. Top-Down (DFS + Memoization)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Same recursion, but cache (i, sum) states to avoid recomputation.
+Store results in unordered_map or vector<unordered_map<int,int>>.
+Saves overlapping subproblems.
+
+Complexity
+TC: O(n * sumRange) (each state computed once).
+SC: O(n * sumRange) for memo + recursion stack.
+
+Code
+class Solution {
+public:
+    int n;
+    vector<unordered_map<int,int>> dp;
+
+    int dfs(vector<int>& nums, int target, int i, int sum)
+    {
+        if(i == n) return sum == target;
+        if(dp[i].count(sum)) return dp[i][sum];
+
+        int a = dfs(nums, target, i+1, sum + nums[i]);
+        int b = dfs(nums, target, i+1, sum - nums[i]);
+
+        return dp[i][sum] = a + b;
+    }
+
+    int findTargetSumWays(vector<int>& nums, int target) {
+        n = nums.size();
+        dp.assign(n, {});
+        return dfs(nums, target, 0, 0);
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+🔹 3. Bottom-Up (DP → Subset Sum)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Transform problem:
+Let sum(nums) = S. We need (S + target) even and ≥ 0.
+Then subsetSum = (S + target)/2.
+Count subsets with sum = subsetSum.
+Classic subset sum DP.
+
+Complexity
+TC: O(n * subsetSum).
+SC: O(subsetSum) (1D rolling array).
+
+Code
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        int S = accumulate(nums.begin(), nums.end(), 0);
+        if((S + target) % 2 || abs(target) > S) return 0;
+
+        int subsetSum = (S + target) / 2;
+        vector<int> dp(subsetSum + 1, 0);
+        dp[0] = 1;
+
+        for(int num : nums)
+        {
+            for(int s = subsetSum; s >= num; s--)
+                dp[s] += dp[s - num];
+        }
+        return dp[subsetSum];
+    }
+};
