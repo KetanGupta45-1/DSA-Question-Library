@@ -1,0 +1,73 @@
+🔹 Top-Down (DFS + Memoization)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Start from (0,0), recursively explore down and right moves until reaching (m-1,n-1).
+Use dp[i][j] to store already computed results (memoization).
+If a cell has an obstacle, return 0.
+
+Complexity
+TC: O(m * n) (each cell computed once).
+SC: O(m * n) for dp + O(m+n) recursion stack.
+
+Code
+class Solution {
+public:
+    int m, n;
+    vector<vector<int>> dp;
+
+    int dfs(vector<vector<int>>& grid, int i, int j)
+    {
+        if(i == m-1 && j == n-1) return 1;
+        if(dp[i][j] != -1) return dp[i][j];
+
+        int down = (i+1 < m && grid[i+1][j] == 0) ? dfs(grid, i+1, j) : 0;
+        int right = (j+1 < n && grid[i][j+1] == 0) ? dfs(grid, i, j+1) : 0;
+
+        return dp[i][j] = down + right;
+    }
+
+    int uniquePathsWithObstacles(vector<vector<int>>& grid) {
+        m = grid.size(), n = grid[0].size();
+        if(grid[0][0] == 1 || grid[m-1][n-1] == 1) return 0;
+        dp.assign(m, vector<int>(n, -1));
+        return dfs(grid, 0, 0);
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+🔹 Bottom-Up (Tabulation)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Build a DP table where dp[i][j] = number of ways to reach (i,j) from start.
+Transition: dp[i][j] = dp[i-1][j] + dp[i][j-1] if no obstacle.
+Fill iteratively row by row.
+
+Complexity
+TC: O(m * n) (full table traversal).
+SC: O(m * n) (2D dp table).
+
+Code
+class Solution {
+public:
+    int uniquePathsWithObstacles(vector<vector<int>>& grid) {
+        int m = grid.size(), n = grid[0].size();
+        if(grid[0][0] == 1 || grid[m-1][n-1] == 1) return 0;
+
+        vector<vector<int>> dp(m, vector<int>(n, 0));
+        dp[0][0] = 1;
+
+        for(int i=0;i<m;i++)
+        {
+            for(int j=0;j<n;j++)
+            {
+                if(grid[i][j] == 1) { dp[i][j] = 0; continue; }
+                if(i > 0) dp[i][j] += dp[i-1][j];
+                if(j > 0) dp[i][j] += dp[i][j-1];
+            }
+        }
+        return dp[m-1][n-1];
+    }
+};
