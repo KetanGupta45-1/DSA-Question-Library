@@ -1,0 +1,164 @@
+(a) Brute Force
+-------------------------------------------------------------------------------------------------
+
+Key points
+Store all words in a set for exact matches.
+For capitalization check, scan wordlist and compare lowercase versions.
+For vowel error check, scan wordlist and compare character-by-character with vowel flexibility.
+
+Complexity
+Time: O(Q×W×L)
+Q = queries, 
+W = wordlist size, 
+L = word length.
+Space: O(W×L) (for set + lowercase conversions).
+
+Code (your brute version):
+class Solution {
+public:
+    bool is_vowel(char c) {
+        c = tolower(c);
+        return c=='a' || c=='e' || c=='i' || c=='o' || c=='u';
+    }
+
+    string to_lower(string s) {
+        for(char &c : s) 
+            c = tolower(c);
+        return s;
+    }
+
+    string find_capatalize(string query, vector<string>& wordlist) {
+        string nq = to_lower(query);
+        for(auto &word : wordlist) {
+            if(nq == to_lower(word))
+                return word;
+        }
+        return "";
+    }
+
+    string vowel_match(string query, vector<string>& wordlist) {
+        string nq = to_lower(query);
+        for(auto &word : wordlist) {
+            if(word.size() != nq.size())
+                continue;
+
+            string w = to_lower(word);
+            bool ok = true;
+            for(int i=0; i<nq.size(); i++) {
+                if(nq[i] == w[i]) continue;
+                if(is_vowel(nq[i]) && is_vowel(w[i])) continue;
+                ok = false; break;
+            }
+            if(ok) return word;
+        }
+        return "";
+    }
+
+    vector<string> spellchecker(vector<string>& wordlist, vector<string>& queries) {
+        unordered_set<string> exact(wordlist.begin(), wordlist.end());
+        vector<string> ans;
+
+        for(auto &query : queries) {
+            if(exact.count(query)) {
+                ans.push_back(query);
+                continue;
+            }
+            string a = find_capatalize(query, wordlist);
+            if(a != "") {
+                ans.push_back(a);
+                continue;
+            }
+            string b = vowel_match(query, wordlist);
+            if(b != "") {
+                ans.push_back(b);
+                continue;
+            }
+            ans.push_back("");
+        }
+        return ans;
+    }
+};
+
+
+
+-------------------------------------------------------------------------------------------------
+(b) Optimized
+-------------------------------------------------------------------------------------------------
+
+Key points
+Preprocess three dictionaries:
+Exact words set.
+Lowercase → first word mapping.
+Vowel-masked lowercase → first word mapping.
+For each query, check in order: exact → lowercase → masked → empty.
+Each lookup is O(1).
+
+Complexity
+Time: O(W×L+Q×L) (preprocessing + queries).
+Space: O(W×L) for maps.
+
+Code (your optimized version):
+class Solution {
+public:
+    bool is_vowel(char c) {
+        c = tolower(c);
+        return c=='a' || c=='e' || c=='i' || c=='o' || c=='u';
+    }
+
+    string to_lower(const string &s) {
+        string res = s;
+        for(char &c : res) 
+            c = tolower(c);
+        return res;
+    }
+
+    string vowel_mask(const string &w) {
+        string res = w;
+        for(char &c : res)
+            if(is_vowel(c))
+                c = '*';
+        return res;
+    }
+
+    vector<string> spellchecker(vector<string>& wordlist, vector<string>& queries) {
+        unordered_set<string> exact;
+        unordered_map<string,string> lower_map;
+        unordered_map<string,string> mask_map;
+        vector<string> ans;
+
+        for(auto &word : wordlist) {
+            exact.insert(word);
+
+            string lower = to_lower(word);
+            if(!lower_map.count(lower))
+                lower_map[lower] = word;
+
+            string masked = vowel_mask(lower);
+            if(!mask_map.count(masked))
+                mask_map[masked] = word;
+        }
+
+        for(auto &q : queries) {
+            if(exact.count(q)) {
+                ans.push_back(q);
+                continue;
+            }
+
+            string lower = to_lower(q);
+            if(lower_map.count(lower)) {
+                ans.push_back(lower_map[lower]);
+                continue;
+            }
+
+            string masked = vowel_mask(lower);
+            if(mask_map.count(masked)) {
+                ans.push_back(mask_map[masked]);
+                continue;
+            }
+
+            ans.push_back("");
+        }
+
+        return ans;
+    }
+};
