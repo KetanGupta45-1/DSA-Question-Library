@@ -1,0 +1,62 @@
+(a) Top-Down DP (Memoization)
+-------------------------------------------------------------------------------------------------
+
+Key points
+Recursive state (i, j) = number of unique paths from (i, j) to (m-1, n-1).
+From each cell, move down or right.
+Use dp[i][j] to memoize results and avoid recomputation.
+
+Complexity
+Time: O(m×n).
+Space: O(m×n) for dp + O(m+n) recursion stack.
+
+Code (fixed version of yours):
+class Solution {
+public:
+    vector<vector<int>> dp;
+
+    int dfs(int i, int j, int m, int n) {
+        if(i == m-1 && j == n-1) 
+            return 1;
+        if(dp[i][j] != -1) 
+            return dp[i][j];
+
+        int down = (i+1 < m) ? dfs(i+1, j, m, n) : 0;
+        int right = (j+1 < n) ? dfs(i, j+1, m, n) : 0;
+
+        return dp[i][j] = down + right;
+    }
+
+    int uniquePaths(int m, int n) {
+        dp.assign(m, vector<int>(n, -1));
+        return dfs(0, 0, m, n);
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+(b) Bottom-Up DP (Tabulation)
+-------------------------------------------------------------------------------------------------
+
+Key points
+Define dp[i][j] = number of paths to reach (i, j) from (0,0).
+First row and first column = 1 (only one way along edges).
+For other cells: dp[i][j] = dp[i-1][j] + dp[i][j-1].
+
+Complexity
+Time: O(m×n).
+Space: O(m×n), reducible to O(n) with 1D DP.
+
+Code (2D version):
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        vector<vector<int>> dp(m, vector<int>(n, 1));
+        for(int i=1; i<m; i++) {
+            for(int j=1; j<n; j++) {
+                dp[i][j] = dp[i-1][j] + dp[i][j-1];
+            }
+        }
+        return dp[m-1][n-1];
+    }
+}
