@@ -1,0 +1,117 @@
+🔹 1. Recursion (Brute Force)
+-------------------------------------------------------------------------------------------------
+
+Idea
+At each cell (i,j), recursively check the largest square possible.
+Square size = 1 + min(down, right, diag) if cell is 1.
+Sum contributions from all cells.
+
+Complexity
+TC: O(3^(m*n)) worst case (repeated subproblems).
+SC: O(m+n) recursion depth.
+
+Code (Recursion)
+class Solution {
+public:
+    int m, n;
+    int solve(vector<vector<int>>& matrix, int i, int j) {
+        if(i >= m || j >= n) return 0;
+        if(matrix[i][j] == 0) return 0;
+
+        int down = solve(matrix, i+1, j);
+        int right = solve(matrix, i, j+1);
+        int diag = solve(matrix, i+1, j+1);
+
+        return 1 + min({down, right, diag});
+    }
+
+    int countSquares(vector<vector<int>>& matrix) {
+        m = matrix.size();
+        n = matrix[0].size();
+        int count = 0;
+        for(int i=0; i<m; i++)
+            for(int j=0; j<n; j++)
+                count += solve(matrix, i, j);
+        return count;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+🔹 2. Top-Down (Recursion + Memoization)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Same recursion, but store results in dp[i][j].
+Avoid recomputation of overlapping subproblems.
+Count all contributions.
+
+Complexity
+TC: O(m*n) (each cell solved once).
+SC: O(m*n) for memo + recursion stack.
+
+Code (Top-Down)
+class Solution {
+public:
+    int m, n;
+    vector<vector<int>> dp;
+
+    int solve(vector<vector<int>>& matrix, int i, int j) {
+        if(i >= m || j >= n) return 0;
+        if(dp[i][j] != -1) return dp[i][j];
+        if(matrix[i][j] == 0) return dp[i][j] = 0;
+
+        int down = solve(matrix, i+1, j);
+        int right = solve(matrix, i, j+1);
+        int diag = solve(matrix, i+1, j+1);
+
+        return dp[i][j] = 1 + min({down, right, diag});
+    }
+
+    int countSquares(vector<vector<int>>& matrix) {
+        m = matrix.size();
+        n = matrix[0].size();
+        dp.assign(m, vector<int>(n, -1));
+        int count = 0;
+        for(int i=0; i<m; i++)
+            for(int j=0; j<n; j++)
+                count += solve(matrix, i, j);
+        return count;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+🔹 3. Bottom-Up (Tabulation)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Build dp[i][j] iteratively:
+If matrix[i][j] == 1:
+dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]).
+Accumulate all dp[i][j] into result.
+
+Complexity
+TC: O(m*n) (one pass).
+SC: O(m*n) (can be reduced to O(n) if optimized).
+
+Code (Bottom-Up)
+class Solution {
+public:
+    int countSquares(vector<vector<int>>& matrix) {
+        int m = matrix.size(), n = matrix[0].size();
+        vector<vector<int>> dp(m, vector<int>(n, 0));
+        int count = 0;
+
+        for(int i=0; i<m; i++) {
+            for(int j=0; j<n; j++) {
+                if(matrix[i][j] == 1) {
+                    if(i == 0 || j == 0) dp[i][j] = 1;
+                    else dp[i][j] = 1 + min({dp[i-1][j], dp[i][j-1], dp[i-1][j-1]});
+                    count += dp[i][j];
+                }
+            }
+        }
+        return count;
+    }
+};
