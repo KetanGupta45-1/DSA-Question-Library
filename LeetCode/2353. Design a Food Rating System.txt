@@ -1,0 +1,126 @@
+Brute Force Approach
+-------------------------------------------------------------------------------------------------
+
+Idea:
+Store the mapping of each food → (rating, cuisine).
+On changeRating(), just update the rating in the map.
+On highestRated(cuisine), iterate through all foods of that cuisine and return the one with the highest rating (ties → lexicographically smaller).
+
+Steps:
+Maintain two maps:
+food_to_rating[food] = rating.
+food_to_cuisine[food] = cuisine.
+On changeRating(food, newRating): update food_to_rating[food].
+On highestRated(cuisine):
+Loop through all foods.
+Pick only those with this cuisine.
+Track max rating (break ties with lexicographically smaller).
+
+Complexity:
+changeRating: O(1) (just update).
+highestRated: O(n) (scan all foods).
+Space: O(n) for storing maps.
+
+class FoodRatings {
+public:
+    unordered_map<string, int> food_to_rating;
+    unordered_map<string, string> food_to_cuisine;
+    vector<string> foods;
+
+    FoodRatings(vector<string>& foods, vector<string>& cuisines, vector<int>& ratings) {
+        for(int i = 0; i < foods.size(); i++) {
+            food_to_rating[foods[i]] = ratings[i];
+            food_to_cuisine[foods[i]] = cuisines[i];
+        }
+        this->foods = foods;
+    }
+    
+    void changeRating(string food, int newRating) {
+        food_to_rating[food] = newRating;
+    }
+    
+    string highestRated(string cuisine) {
+        string best = "";
+        int maxRating = -1;
+        for(string food : foods) {
+            if(food_to_cuisine[food] == cuisine) {
+                int r = food_to_rating[food];
+                if(r > maxRating || (r == maxRating && food < best)) {
+                    maxRating = r;
+                    best = food;
+                }
+            }
+        }
+        return best;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Optimized Approach (Your Code)
+-------------------------------------------------------------------------------------------------
+
+Idea:
+Pre-store foods inside a balanced structure (set with custom comparator) per cuisine.
+This ensures we can get the best food of a cuisine in O(1) (just begin()).
+When updating, remove the old rating entry and insert the new one.
+
+Steps:
+Maps:
+food_to_rating = stores latest rating of each food.
+food_to_cuisine = stores cuisine of each food.
+cuisine_to_food_rating = set<pair<rating, food>> (sorted automatically).
+On changeRating:
+Remove old (rating, food) from cuisine set.
+Insert (newRating, food).
+Update map.
+On highestRated:
+Directly return begin()->second (since set is sorted by rating desc, then lex order).
+
+Complexity:
+changeRating: O(log n) (erase + insert in set).
+highestRated: O(1) (just lookup first element).
+Space: O(n) for maps + sets.
+
+Code
+typedef pair<int, string> p;
+
+struct Comp {
+    bool operator()(const p& a, const p& b) const {
+        if(a.first == b.first)
+            return a.second < b.second; 
+        return a.first > b.first; // higher rating first
+    }
+};
+
+class FoodRatings {
+public:
+    unordered_map<string, int> food_to_rating;
+    unordered_map<string, string> food_to_cuisine;
+    unordered_map<string, set<p, Comp>> cuisine_to_food_rating;
+
+    FoodRatings(vector<string>& foods, vector<string>& cuisines, vector<int>& ratings) {
+        for(int i = 0; i < foods.size(); i++) {
+            string food = foods[i];
+            string cuisine = cuisines[i];
+            int rate = ratings[i];
+
+            food_to_rating[food] = rate;
+            food_to_cuisine[food] = cuisine;
+            cuisine_to_food_rating[cuisine].insert({rate, food});
+        }
+    }
+    
+    void changeRating(string food, int newRating) {
+        string cuisine = food_to_cuisine[food];
+        int oldRating = food_to_rating[food];
+
+        cuisine_to_food_rating[cuisine].erase({oldRating, food});
+        cuisine_to_food_rating[cuisine].insert({newRating, food});
+        food_to_rating[food] = newRating;
+    }
+    
+    string highestRated(string cuisine) {
+        return cuisine_to_food_rating[cuisine].begin()->second;
+    }
+};
+

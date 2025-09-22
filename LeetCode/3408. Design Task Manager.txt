@@ -1,0 +1,136 @@
+🔹 Brute Force Approach
+-------------------------------------------------------------------------------------------------
+
+Summary (4 points)
+Maintain a list (vector) of all active tasks {userId, taskId, priority}.
+On add → push new task.
+On edit / rmv → update or erase by scanning the list.
+On execTop → scan the list linearly to find the highest priority task (and erase it).
+
+✅ TC
+add: O(1)
+edit: O(n) (scan to find task)
+rmv: O(n) (scan to erase task)
+execTop: O(n) (find max priority)
+✅ SC: O(n)
+
+Code (Brute Force)
+class TaskManager {
+public:
+    struct Task {
+        int userId, taskId, priority;
+    };
+    vector<Task> tasks;
+
+    TaskManager(vector<vector<int>>& initTasks) {
+        for(auto& t : initTasks) {
+            tasks.push_back({t[0], t[1], t[2]});
+        }
+    }
+
+    void add(int userId, int taskId, int priority) {
+        tasks.push_back({userId, taskId, priority});
+    }
+
+    void edit(int taskId, int newPriority) {
+        for(auto& task : tasks) {
+            if(task.taskId == taskId) {
+                task.priority = newPriority;
+                return;
+            }
+        }
+    }
+
+    void rmv(int taskId) {
+        for(int i = 0; i < tasks.size(); i++) {
+            if(tasks[i].taskId == taskId) {
+                tasks.erase(tasks.begin() + i);
+                return;
+            }
+        }
+    }
+
+    int execTop() {
+        if(tasks.empty()) return -1;
+
+        int idx = 0;
+        for(int i = 1; i < tasks.size(); i++) {
+            if(tasks[i].priority > tasks[idx].priority || 
+              (tasks[i].priority == tasks[idx].priority && tasks[i].taskId > tasks[idx].taskId)) {
+                idx = i;
+            }
+        }
+        int userId = tasks[idx].userId;
+        tasks.erase(tasks.begin() + idx);
+        return userId;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+🔹 Optimized Approach (Your Priority Queue Version)
+-------------------------------------------------------------------------------------------------
+
+Summary (4 points)
+Maintain unordered_map for taskId → {userId, priority}.
+Maintain a max-heap (priority_queue) keyed by {priority, taskId} for fast retrieval.
+On edit/rmv → just update the map; lazy deletion ensures old versions get skipped in execTop.
+On execTop → pop until you find the valid top (latest priority & not removed).
+
+✅ TC
+add: O(log n)
+edit: O(log n) (heap push)
+rmv: O(1) (lazy remove)
+execTop: O(log n) amortized
+✅ SC: O(n)
+
+Code (Optimized)
+class TaskManager {
+public:
+    unordered_map<int, pair<int,int>> task_info; 
+    // taskId -> {userId, priority}
+
+    struct cmp {
+        bool operator()(const pair<int,int>& a, const pair<int,int>& b) const {
+            if(a.first == b.first) return a.second < b.second; 
+            return a.first < b.first; 
+        }
+    };
+
+    priority_queue<pair<int,int>, vector<pair<int,int>>, cmp> pq;
+
+    TaskManager(vector<vector<int>>& tasks) {
+        for(auto& t : tasks) {
+            int u = t[0], taskId = t[1], p = t[2];
+            task_info[taskId] = {u, p};
+            pq.push({p, taskId});
+        }
+    }
+
+    void add(int userId, int taskId, int priority) {
+        task_info[taskId] = {userId, priority};
+        pq.push({priority, taskId});
+    }
+
+    void edit(int taskId, int newPriority) {
+        if(!task_info.count(taskId)) return;
+        int userId = task_info[taskId].first;
+        task_info[taskId] = {userId, newPriority};
+        pq.push({newPriority, taskId});
+    }
+
+    void rmv(int taskId) {
+        task_info.erase(taskId);
+    }
+
+    int execTop() {
+        while(!pq.empty()) {
+            auto [priority, taskId] = pq.top(); pq.pop();
+            if(task_info.count(taskId) && task_info[taskId].second == priority) {
+                int userId = task_info[taskId].first;
+                task_info.erase(taskId);
+                return userId;
+            }
+        }
+        return -1;
+    }
+};

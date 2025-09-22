@@ -1,0 +1,79 @@
+Brute Force
+-------------------------------------------------------------------------------------------------
+
+Idea
+Keep iterating through the array.
+If two adjacent numbers are not coprime (gcd > 1), merge them into LCM.
+Restart the check from the beginning until no more merges happen.
+
+Complexity
+TC: Worst case O(n^2 * log(maxVal)) because after every merge we may need to restart.
+SC: O(1) extra space.
+
+Code (Brute Force)
+class Solution {
+public:
+    vector<int> replaceNonCoprimes(vector<int>& nums) {
+        bool changed = true;
+        while(changed) {
+            changed = false;
+            vector<int> temp;
+            for(int i=0; i<nums.size(); i++) {
+                if(!temp.empty()) {
+                    int g = gcd(temp.back(), nums[i]);
+                    if(g > 1) {
+                        long long l = (1LL * temp.back() * nums[i]) / g;
+                        temp.back() = l;
+                        changed = true;
+                    } else {
+                        temp.push_back(nums[i]);
+                    }
+                } else {
+                    temp.push_back(nums[i]);
+                }
+            }
+            nums = temp;
+        }
+        return nums;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Optimized (Stack – Your Code ✅)
+-------------------------------------------------------------------------------------------------
+
+Idea
+Use a stack to maintain the processed numbers.
+For each new number, merge with stack top while gcd > 1.
+Push merged result when done.
+At the end, stack contains the final sequence.
+
+Complexity
+TC: O(n * log(maxVal)) → each number pushed and popped at most once.
+SC: O(n) for stack.
+
+Code (Optimized)
+class Solution {
+public:
+    vector<int> replaceNonCoprimes(vector<int>& nums) {
+        stack<long long> st;
+        for(int num : nums) {
+            long long curr = num;
+            while(!st.empty()) {
+                long long g = gcd(st.top(), curr);
+                if(g > 1) {
+                    curr = (st.top() * curr) / g;
+                    st.pop();
+                } else break;
+            }
+            st.push(curr);
+        }
+        vector<int> ans(st.size());
+        for(int i = ans.size()-1; i >= 0; i--) {
+            ans[i] = st.top();
+            st.pop();
+        }
+        return ans;
+    }
+};
