@@ -1,0 +1,143 @@
+Brute Force Approach
+-------------------------------------------------------------------------------------------------
+Explanation
+Maintain only a list/array of all (shop, movie, price) tuples.
+For search, scan the whole list, collect entries for that movie, sort by (price, shop) each time, and return top 5.
+For rent/drop, update the tuple manually (mark rented/unrented) by scanning.
+For report, scan all tuples, pick rented ones, sort by (price, shop, movie) each time.
+
+⏱️ Time Complexity
+search: O(N log N) per query (sorting all candidates).
+rent/drop: O(N) (linear scan to update).
+report: O(N log N) (sorting rented list).
+
+💾 Space Complexity
+O(N) for storing all entries.
+
+Brute Force Code (naive)
+class MovieRentingSystem {
+public:
+    vector<vector<int>> entries;
+    unordered_map<int,int> rented; // key = shop*10000+movie
+
+    MovieRentingSystem(int n, vector<vector<int>>& e) {
+        entries = e;
+    }
+
+    vector<int> search(int movie) {
+        vector<pair<int,int>> candidates;
+        for (auto &e : entries) {
+            int shop=e[0], m=e[1], price=e[2];
+            if (m==movie && !rented.count(shop*10000+m))
+                candidates.push_back({price, shop});
+        }
+        sort(candidates.begin(), candidates.end());
+        vector<int> ans;
+        for(int i=0;i<min(5,(int)candidates.size());i++)
+            ans.push_back(candidates[i].second);
+        return ans;
+    }
+
+    void rent(int shop, int movie) {
+        rented[shop*10000+movie]=1;
+    }
+
+    void drop(int shop, int movie) {
+        rented.erase(shop*10000+movie);
+    }
+
+    vector<vector<int>> report() {
+        vector<tuple<int,int,int>> r;
+        for (auto &e : entries) {
+            int shop=e[0], m=e[1], price=e[2];
+            if (rented.count(shop*10000+m))
+                r.push_back({price, shop, m});
+        }
+        sort(r.begin(), r.end());
+        vector<vector<int>> ans;
+        for(int i=0;i<min(5,(int)r.size());i++)
+            ans.push_back({get<1>(r[i]), get<2>(r[i])});
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Optimised Approach (Your Code)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use ordered sets to keep movies available, always sorted by (price, shop).
+Use a map of maps to quickly retrieve a movie’s price for a given shop.
+Use another ordered set of tuples (price, shop, movie) to keep track of rented movies in sorted order.
+
+Now:
+search: O(5) → take first 5 shops from ordered set.
+rent/drop: O(log N) → erase/insert in sets.
+report: O(5) → take first 5 from rented set.
+
+⏱️ Time Complexity
+search: O(5 log N) (due to iteration, basically constant).
+rent/drop: O(log N).
+report: O(5 log N).
+
+💾 Space Complexity
+O(N) for maps and sets.
+
+Optimised Code (your version)
+typedef pair<int,int> p;
+
+struct Comp {
+    bool operator()(const p& a, const p& b) const {
+        if (a.first == b.first) return a.second < b.second;
+        return a.first < b.first;
+    }
+};
+
+class MovieRentingSystem {
+public:
+    unordered_map<int, set<p>> available;
+    unordered_map<int, unordered_map<int,int>> movie_shop_price;
+    set<tuple<int,int,int>> rented;
+
+    MovieRentingSystem(int n, vector<vector<int>>& entries) {
+        for(auto &e : entries) {
+            int shop=e[0], movie=e[1], price=e[2];
+            available[movie].insert({price, shop});
+            movie_shop_price[movie][shop]=price;
+        }
+    }
+
+    vector<int> search(int movie) {
+        vector<int> res;
+        int cnt=0;
+        if(available.count(movie)) {
+            for(auto &[price, shop] : available[movie]) {
+                res.push_back(shop);
+                if(++cnt==5) break;
+            }
+        }
+        return res;
+    }
+
+    void rent(int shop, int movie) {
+        int price=movie_shop_price[movie][shop];
+        available[movie].erase({price, shop});
+        rented.insert({price, shop, movie});
+    }
+
+    void drop(int shop, int movie) {
+        int price=movie_shop_price[movie][shop];
+        available[movie].insert({price, shop});
+        rented.erase({price, shop, movie});
+    }
+
+    vector<vector<int>> report() {
+        vector<vector<int>> res;
+        int cnt=0;
+        for(auto &[price, shop, movie]:rented) {
+            res.push_back({shop, movie});
+            if(++cnt==5) break;
+        }
+        return res;
+    }
+};

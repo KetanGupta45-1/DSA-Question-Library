@@ -1,0 +1,27 @@
+Definition → A number n is strictly palindromic if it is palindromic in every base from 2 to n-2.
+Check smallest valid base → In base (n-2), the representation of n is always "12".
+Example: n=9 → base 7 → "12".
+"12" is never a palindrome.
+General contradiction → Because of this "12" form, no integer n ≥ 4 can ever satisfy the condition.
+Special small cases → For n = 1, 2, 3, the definition itself is meaningless because there is no valid range of bases (2 to n-2) to check.
+Thus → For every n ≥ 4, isStrictlyPalindromic(n) is false.
+
+Step-by-step derivation
+Take base = (n-2).
+We want to write n in this base.
+
+Do integer division. n = (n−2)×1+2
+That’s because:
+Quotient = 1 (since n ÷ (n-2) is just slightly above 1).
+Remainder = 2 (because n - (n-2) = 2).
+
+Construct digits.
+The quotient (1) becomes the most significant digit.
+The remainder (2) becomes the least significant digit.
+So representation = "12".
+
+Example check
+n = 9, base 7: 9 = 7×1 + 2 → "12".
+n = 10, base 8: 10 = 8×1 + 2 → "12".
+n = 20, base 18: 20 = 18×1 + 2 → "12".
+✅ "12" is never a palindrome → hence no n ≥ 4 is strictly palindromic.
