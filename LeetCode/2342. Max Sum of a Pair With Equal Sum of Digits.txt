@@ -1,0 +1,97 @@
+🟢 Brute Force Approach
+-------------------------------------------------------------------------------------------------------------------------------------
+
+📖 Explanation (4 Points)
+Compute digit sum for every number.
+Compare every pair (i, j) in the array.
+If they have the same digit sum → candidate pair.
+Track the maximum sum among all valid pairs.
+
+⏱️ Complexity
+Time: O(n² · d), where d = number of digits.
+Space: O(1).
+
+💻 Code
+class Solution {
+public:
+    int find_sum(int x)
+    {
+        int sum = 0;
+        while(x)
+        {
+            sum += x % 10;
+            x /= 10;
+        }
+        return sum;
+    }
+
+    int maximumSum(vector<int>& nums) {
+        int n = nums.size(), ans = -1;
+        for(int i=0; i<n; i++)
+        {
+            for(int j=i+1; j<n; j++)
+            {
+                if(find_sum(nums[i]) == find_sum(nums[j]))
+                    ans = max(ans, nums[i] + nums[j]);
+            }
+        }
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+🟠 Optimized Approach
+-------------------------------------------------------------------------------------------------------------------------------------
+
+📖 Explanation (4 Points)
+Compute digit sum of each number only once.
+Use a hashmap → key = digit sum, value = top 2 largest numbers with that digit sum.
+Update top 2 as we iterate.
+For each digit sum group with ≥2 numbers, compute candidate sum and maximize.
+
+⏱️ Complexity
+Time: O(n · d)
+Space: O(k), where k is possible digit sums (≤ 81 if nums ≤ 10⁹).
+
+💻 Code
+class Solution {
+public:
+    int find_sum(int x)
+    {
+        int sum = 0;
+        while(x)
+        {
+            sum += x % 10;
+            x /= 10;
+        }
+        return sum;
+    }
+
+    int maximumSum(vector<int>& nums) {
+        unordered_map<int, pair<int,int>> mp;
+        int ans = -1;
+
+        for(int ele : nums)
+        {
+            int sum = find_sum(ele);
+
+            if(mp.find(sum) == mp.end())
+                mp[sum] = {ele, -1};
+            else
+            {
+                auto &p = mp[sum];
+                if(ele > p.first)
+                {
+                    p.second = p.first;
+                    p.first = ele;
+                }
+                else if(ele > p.second)
+                    p.second = ele;
+
+                if(p.second != -1)
+                    ans = max(ans, p.first + p.second);
+            }
+        }
+        return ans;
+    }
+};
