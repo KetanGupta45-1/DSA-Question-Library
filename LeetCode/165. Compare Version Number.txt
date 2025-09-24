@@ -1,0 +1,144 @@
+Brute Force
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Split both version strings by "." into parts.
+Convert each part into integers directly (without trimming zeros).
+Compare corresponding parts one by one.
+If one version has more parts left, check if any of them are non-zero to decide the result.
+
+Complexity
+Time: O(n + m) → parsing both strings and comparing parts.
+Space: O(k) → storing split parts.
+
+Code
+class Solution {
+public:
+    vector<string> split_parts(string s)
+    {
+        vector<string> ans;
+        string temp = "";
+        for(int i=0; i<s.size(); i++)
+        {
+            if(s[i] == '.')
+            {
+                ans.push_back(temp);
+                temp = "";
+                continue;
+            }
+            temp += s[i];
+        }
+        ans.push_back(temp); 
+        return ans;
+    }
+
+    int compareVersion(string version1, string version2) {
+        vector<string> p1 = split_parts(version1);
+        vector<string> p2 = split_parts(version2);
+
+        int i=0, j=0;
+        while(i<p1.size() && j<p2.size())
+        {
+            int x1 = stoi(p1[i]);
+            int x2 = stoi(p2[j]);
+            if(x1 > x2) return 1;
+            if(x1 < x2) return -1;
+            i++; j++;
+        }
+
+        while(i<p1.size())
+        {
+            if(stoi(p1[i]) > 0) return 1;
+            i++;
+        }
+
+        while(j<p2.size())
+        {
+            if(stoi(p2[j]) > 0) return -1;
+            j++;
+        }
+
+        return 0;
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Optimized (Normalization Before Comparison)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Split both version strings by ".".
+Normalize each part by removing leading zeros.
+Compare parts as integers.
+If one version has extra parts, only non-zero parts matter.
+This ensures "1.01" and "1.001" are treated as equal.
+
+Complexity
+Time: O(n + m) → single pass split + normalization + comparison.
+Space: O(k) → storing normalized parts.
+
+Code
+class Solution {
+public:
+    vector<string> split_parts(string s)
+    {
+        vector<string> ans;
+        string temp = "";
+        for(int i=0; i<s.size(); i++)
+        {
+            if(s[i] == '.')
+            {
+                ans.push_back(temp);
+                temp = "";
+                continue;
+            }
+            temp += s[i];
+        }
+        ans.push_back(temp); 
+        return ans;
+    }
+
+    string normalize(string s)
+    {
+        int i=0;
+        while(i<s.size() && s[i]=='0')
+            i++;
+        if(i==s.size()) return "0"; 
+        return s.substr(i);
+    }
+
+    int compareVersion(string version1, string version2) {
+        vector<string> p1 = split_parts(version1);
+        vector<string> p2 = split_parts(version2);
+
+        for(int i=0; i<p1.size(); i++)
+            p1[i] = normalize(p1[i]);
+
+        for(int i=0; i<p2.size(); i++)
+            p2[i] = normalize(p2[i]);
+
+        int i=0, j=0;
+        while(i<p1.size() && j<p2.size())
+        {
+            int x1 = stoi(p1[i]);
+            int x2 = stoi(p2[j]);
+            if(x1 > x2) return 1;
+            if(x1 < x2) return -1;
+            i++; j++;
+        }
+
+        while(i<p1.size())
+        {
+            if(stoi(p1[i]) > 0) return 1;
+            i++;
+        }
+
+        while(j<p2.size())
+        {
+            if(stoi(p2[j]) > 0) return -1;
+            j++;
+        }
+
+        return 0;
+    }
+};

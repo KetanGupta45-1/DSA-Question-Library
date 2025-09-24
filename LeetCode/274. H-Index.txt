@@ -1,0 +1,110 @@
+Brute Force (Counting for Every Possible h)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+For each citation value, decrement down to 0 and increment counts in a map (so each paper contributes to all possible h ≤ its citation).
+After filling counts, check for each possible h if there are at least h papers with ≥ h citations.
+Keep the maximum valid h.
+Return the answer.
+
+Complexity
+Time: O(n * c) where c = average citation value (very costly if citations are large).
+Space: O(c) → hash map to count all possible h values.
+
+Code
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        int n = citations.size();
+        unordered_map<int, int> mp;
+
+        for (auto ele : citations)
+        {
+            int x = ele;
+            while (x >= 0)
+            {
+                mp[x]++;
+                x--;
+            }
+        }
+
+        int ans = 0;
+        for (auto &it : mp)
+        {
+            int key = it.first;
+            int value = it.second;
+            if (key <= value)
+                ans = max(ans, key);
+        }
+
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Optimized (Sorting + Greedy)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Sort the citation array in descending order.
+Traverse papers one by one, checking how many papers have at least that many citations.
+If citations[i] ≥ i+1, update h = i+1.
+Return the maximum valid h.
+
+Complexity
+Time: O(n log n) → sorting dominates.
+Space: O(1) → sorting in-place.
+
+Code
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        sort(citations.begin(), citations.end(), greater<int>());
+        int h = 0;
+        for (int i = 0; i < citations.size(); i++) {
+            if (citations[i] >= i + 1)
+                h = i + 1;
+            else
+                break;
+        }
+        return h;
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Most Optimal (Counting Sort Idea, O(n))
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Since h can be at most n, build a frequency array count[n+1].
+For each citation c:
+If c ≥ n, increment count[n].
+Else, increment count[c].
+Traverse from the back (highest h possible) and keep cumulative total of papers.
+The largest h such that total ≥ h is the answer.
+
+Complexity
+Time: O(n) → one pass to fill freq, one pass to find answer.
+Space: O(n) → frequency array of size n+1.
+
+Code
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        int n = citations.size();
+        vector<int> count(n+1, 0);
+
+        for (int c : citations) {
+            if (c >= n) count[n]++;
+            else count[c]++;
+        }
+
+        int total = 0;
+        for (int h = n; h >= 0; h--) {
+            total += count[h];
+            if (total >= h) return h;
+        }
+        return 0;
+    }
+};

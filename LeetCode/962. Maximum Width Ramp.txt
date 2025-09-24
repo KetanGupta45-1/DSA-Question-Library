@@ -1,0 +1,112 @@
+Brute Force (Check All Pairs)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+A ramp is defined as indices (i, j) with i < j and nums[i] ≤ nums[j].
+For every pair (i, j), check if it forms a valid ramp.
+Track the maximum width j - i.
+Return the maximum found.
+
+Complexity
+Time: O(n²) → nested loops over all pairs.
+Space: O(1).
+
+Code
+class Solution {
+public:
+    int maxWidthRamp(vector<int>& nums) {
+        int n = nums.size();
+        int ans = 0;
+        for(int i = 0; i < n; i++) {
+            for(int j = i+1; j < n; j++) {
+                if(nums[i] <= nums[j])
+                    ans = max(ans, j - i);
+            }
+        }
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Optimized (Sorting + Greedy Scan)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Store pairs (value, index) for each element.
+Sort by value, and if values tie, sort by index.
+Traverse sorted pairs while tracking the smallest index seen so far.
+For each pair, compute width = current_index - minIndex.
+Update maximum width ramp.
+
+Complexity
+Time: O(n log n) → sorting dominates.
+Space: O(n) → storing pairs.
+
+Code
+class Solution {
+public:
+    static bool comp(pair<int, int> a1, pair<int, int> a2) {
+        if (a1.first == a2.first)
+            return a1.second < a2.second;
+        return a1.first < a2.first;
+    }
+
+    int maxWidthRamp(vector<int>& nums) {
+        vector<pair<int, int>> array;
+        int n = nums.size();
+
+        for (int i = 0; i < n; i++)
+            array.push_back({nums[i], i});
+
+        sort(array.begin(), array.end(), comp);
+
+        int maxwidth = 0;
+        int minIndex = INT_MAX;
+
+        for (auto& p : array) {
+            int idx = p.second;
+            maxwidth = max(maxwidth, idx - minIndex);
+            minIndex = min(minIndex, idx);
+        }
+
+        return maxwidth;
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Most Optimal (Monotonic Stack + Right Scan)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Build a decreasing stack of indices (store indices of elements forming strictly decreasing sequence).
+Traverse from right to left:
+While stack is non-empty and nums[i] ≤ nums[stack.top()], update max width.
+Pop stack elements that form valid ramps.
+This ensures each valid ramp is checked efficiently.
+
+Complexity
+Time: O(n) → each element is pushed and popped at most once.
+Space: O(n) → stack storage.
+
+Code
+class Solution {
+public:
+    int maxWidthRamp(vector<int>& nums) {
+        int n = nums.size();
+        stack<int> st;
+
+        for (int i = 0; i < n; i++) {
+            if (st.empty() || nums[i] < nums[st.top()])
+                st.push(i);
+        }
+
+        int ans = 0;
+        for (int j = n-1; j >= 0; j--) {
+            while (!st.empty() && nums[j] >= nums[st.top()]) {
+                ans = max(ans, j - st.top());
+                st.pop();
+            }
+        }
+        return ans;
+    }
+};

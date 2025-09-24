@@ -1,0 +1,60 @@
+Brute Force (Naive Division Simulation)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation
+Perform long division manually: divide numerator by denominator repeatedly.
+Store each quotient digit in a string and continue until remainder becomes 0.
+If a remainder repeats, that means the decimal expansion is repeating.
+Insert parentheses around the repeating part.
+
+Complexity
+Time: O(q) where q is the length of repeating cycle (can be up to denominator).
+Space: O(q) → storing remainders and fractional part.
+
+Code
+class Solution {
+public:
+    string fractionToDecimal(int numerator, int denominator) {
+        if (numerator == 0) 
+            return "0";
+
+        string ans = "";
+
+        if ((numerator < 0) ^ (denominator < 0)) 
+            ans += "-";
+
+        long long num = llabs((long long)numerator);
+        long long den = llabs((long long)denominator);
+
+        long long q = num / den;
+        long long r = num % den;
+        ans += to_string(q);
+
+        if (r == 0) 
+            return ans; 
+
+        ans += ".";
+
+        unordered_map<long long, int> mp;
+        string frac = "";
+
+        while (r != 0) 
+        {
+            if (mp.count(r)) 
+            {
+                frac.insert(mp[r], "(");
+                frac += ")";
+                ans += frac;
+                return ans;
+            }
+
+            mp[r] = frac.size();
+            r *= 10;
+            frac += to_string(r / den);
+            r %= den;
+        }
+
+        ans += frac;
+        return ans;
+    }
+};
