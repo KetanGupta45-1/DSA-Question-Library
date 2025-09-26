@@ -1,0 +1,78 @@
+DP with Remainder (your code style)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+1. Idea
+Keep track of the minimum possible sum that gives each remainder modulo k.
+Use a DP array dp[r] where r is the remainder (0…k-1), storing the minimum sum achievable with that remainder.
+As we iterate over nums, update dp using prefix sums.
+Answer is dp[0].
+
+2. Steps
+Initialize dp with LLONG_MAX, except dp[0] = 0.
+Iterate through array and update remainder states.
+Maintain running prefix sum and update the best sum for its remainder.
+Final answer = dp[0].
+
+3. Complexity
+Time Complexity: O(n)
+Space Complexity: O(k)
+
+4. Code
+class Solution {
+public:
+    long long minArraySum(vector<int>& nums, int k) {
+        vector<long long> dp(k, LLONG_MAX);
+        dp[0] = 0;
+        long long sum = 0;
+
+        for(int x : nums)
+        {
+            sum += x;
+            int r = sum % k;
+            dp[r] = min(dp[r], sum);
+        }
+
+        return dp[0];
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Bitmask DP
+-------------------------------------------------------------------------------------------------------------------------------------
+
+1. Idea
+Each subset of numbers can be represented by a bitmask.
+For each mask, compute the sum of selected elements.
+Track the minimum sum with remainder r.
+Finally, return the smallest sum divisible by k.
+
+2. Steps
+Precompute sums for all subsets using bitmask.
+For each subset, take remainder sum % k and store the minimum.
+Answer is the minimum sum where remainder = 0.
+
+3. Complexity
+Time Complexity: O(2^n) → feasible only for small n (like ≤20).
+Space Complexity: O(2^n)
+
+4. Code
+class Solution {
+public:
+    long long minArraySum(vector<int>& nums, int k) {
+        int n = nums.size();
+        long long ans = LLONG_MAX;
+        int totalMasks = 1 << n;
+
+        for(int mask = 1; mask < totalMasks; mask++)
+        {
+            long long sum = 0;
+            for(int i=0; i<n; i++)
+            {
+                if(mask & (1 << i)) sum += nums[i];
+            }
+            if(sum % k == 0) ans = min(ans, sum);
+        }
+
+        return ans == LLONG_MAX ? 0 : ans;
+    }
+};

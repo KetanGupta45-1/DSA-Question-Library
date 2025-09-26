@@ -1,0 +1,110 @@
+🟢 Brute Force (Simulation)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation (4 Points)
+Try every index k from 0 to n−1 as the potential starting point.
+For each k, simulate sorting by checking if swapping elements after index k can yield a sorted array.
+Use a copy of the array and apply sorting/validation.
+Return the first valid k, otherwise return 0.
+
+Complexity
+Time: O(n²) → checking each index with sorting/validation.
+Space: O(n) for temporary arrays.
+
+Code
+class Solution {
+public:
+    int sortPermutation(vector<int>& nums) {
+        int n = nums.size();
+        for(int k = 0; k < n; k++) {
+            vector<int> temp = nums;
+            sort(temp.begin() + k, temp.end());
+            if(is_sorted(temp.begin(), temp.end()))
+                return k;
+        }
+        return 0;
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+🟠 Greedy / Bitmask AND (Your Approach)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation (4 Points)
+If element at index i is already in its place (nums[i] == i), ignore it.
+Otherwise, collect all indices that are misplaced.
+The minimum valid index k is the bitwise AND of all such indices.
+If no elements are misplaced, answer = 0.
+
+Complexity
+Time: O(n).
+Space: O(1).
+
+Code (your version)
+class Solution {
+public:
+    int sortPermutation(vector<int>& nums) {
+        int n = nums.size();
+        int k = INT_MAX;
+    
+        for(int i=0; i<n; i++) {
+            if(i != nums[i])
+                k &= i;
+        }
+        return k == INT_MAX ? 0 : k;
+    }
+};
+
+-------------------------------------------------------------------------------------------------------------------------------------
+🔵 Optimized (DSU Approach)
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Explanation (4 Points)
+Treat the permutation as a graph → edge from i → nums[i].
+Use Disjoint Set Union (DSU) to group indices into connected components.
+Within each component, elements can be rearranged freely.
+The minimum index k is the bitwise AND of indices that are misplaced but still connected in DSU.
+
+Complexity
+Time: O(n α(n)) ≈ O(n).
+Space: O(n) for DSU parent/size arrays.
+
+Code
+class DSU {
+public:
+    vector<int> parent, size;
+    DSU(int n) {
+        parent.resize(n);
+        size.assign(n, 1);
+        iota(parent.begin(), parent.end(), 0);
+    }
+    int find(int x) {
+        return parent[x] == x ? x : parent[x] = find(parent[x]);
+    }
+    void unite(int a, int b) {
+        a = find(a); b = find(b);
+        if(a != b) {
+            if(size[a] < size[b]) swap(a, b);
+            parent[b] = a;
+            size[a] += size[b];
+        }
+    }
+};
+
+class Solution {
+public:
+    int sortPermutation(vector<int>& nums) {
+        int n = nums.size();
+        DSU dsu(n);
+
+        for(int i=0; i<n; i++)
+            dsu.unite(i, nums[i]);
+
+        int k = INT_MAX;
+        for(int i=0; i<n; i++) {
+            if(i != nums[i])
+                k &= dsu.find(i);
+        }
+        return k == INT_MAX ? 0 : k;
+    }
+};
