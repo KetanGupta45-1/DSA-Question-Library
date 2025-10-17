@@ -1,0 +1,72 @@
+Loop-based Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Traverse the string once using a simple loop.
+Start with count = 1 since the first character always forms one possible string.
+Compare each character with its previous one — if they’re equal, increment the count.
+Update prev each time as you move forward through the string.
+
+Complexity
+Time: O(n) (single pass through the string)
+Space: O(1) (constant extra memory)
+
+Code
+
+class Solution {
+public:
+    int possibleStringCount(string word) {
+        int n = word.size();
+        int count = 1;
+        char prev = '*';
+
+        for(char curr : word)
+        {
+            if(prev == '*')
+                prev = curr;
+            else
+            {
+                if(prev == curr)
+                    count++;
+                prev = curr;
+            }
+        }
+
+        return count;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Stack-based Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use a stack to track consecutive characters.
+Push the first character, then for each new character:
+If it equals the top of the stack, increment the count (a new possible string).
+Otherwise, push the new character.
+In the end, return total count of possible strings.
+
+Complexity
+Time: O(n) (each character processed once)
+Space: O(n) (worst case, all characters unique)
+
+Code
+
+class Solution {
+public:
+    int possibleStringCount(string word) {
+        stack<char> st;
+        int count = 0;
+
+        for(char c : word)
+        {
+            if(!st.empty() && st.top() == c)
+                count++;
+            else
+                st.push(c);
+        }
+
+        return count + 1;
+    }
+};
