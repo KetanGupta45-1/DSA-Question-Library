@@ -1,0 +1,167 @@
+Brute-force Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Simulate collisions directly by repeatedly scanning the asteroid list.
+Whenever two adjacent asteroids collide (a positive followed by a negative), compare their absolute sizes:
+
+If equal, both are destroyed.
+
+If one is larger, remove the smaller one.
+Repeat this process until no more collisions occur.
+This approach mimics the real explosion chain but is inefficient because it requires rescanning after every modification.
+
+Complexity
+Time: O(n²) (each collision may trigger multiple rescans)
+Space: O(1) (in-place modification of the vector)
+
+Code
+
+class Solution {
+public:
+    vector<int> asteroidCollision(vector<int>& asteroids) {
+        bool changed = true;
+
+        while(changed)
+        {
+            changed = false;
+            for(int i = 0; i + 1 < asteroids.size(); i++)
+            {
+                if(asteroids[i] > 0 && asteroids[i + 1] < 0)
+                {
+                    if(abs(asteroids[i]) == abs(asteroids[i + 1]))
+                    {
+                        asteroids.erase(asteroids.begin() + i, asteroids.begin() + i + 2);
+                    }
+                    else if(abs(asteroids[i]) > abs(asteroids[i + 1]))
+                    {
+                        asteroids.erase(asteroids.begin() + i + 1);
+                    }
+                    else
+                    {
+                        asteroids.erase(asteroids.begin() + i);
+                    }
+                    changed = true;
+                    break;
+                }
+            }
+        }
+        return asteroids;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Optimized (Stack-based Simulation) Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use a stack to track surviving asteroids moving to the right.
+For each new asteroid:
+
+If it’s moving right (>0), push it to the stack.
+If it’s moving left (<0), check collisions:
+If top of stack is smaller, pop it (destroyed).
+If both equal, pop top (both destroyed).
+
+If top is larger, current asteroid is destroyed.
+Push the asteroid only if it survives after all collisions.
+At the end, the stack represents all remaining asteroids in order.
+
+Complexity
+Time: O(n) (each asteroid pushed/popped at most once)
+Space: O(n) (stack for survivors)
+
+Code
+
+class Solution {
+public:
+    vector<int> asteroidCollision(vector<int>& asteroids) {
+        stack<int> st;
+
+        for(int asteroid : asteroids)
+        {
+            bool destroyed = false;
+
+            while(!st.empty() && st.top() > 0 && asteroid < 0)
+            {
+                if(abs(st.top()) < abs(asteroid))
+                {
+                    st.pop();
+                    continue;
+                }
+                else if(abs(st.top()) == abs(asteroid))
+                {
+                    st.pop();
+                }
+                destroyed = true;
+                break;
+            }
+
+            if(!destroyed)
+                st.push(asteroid);
+        }
+
+        vector<int> result;
+        while(!st.empty())
+        {
+            result.push_back(st.top());
+            st.pop();
+        }
+
+        reverse(result.begin(), result.end());
+        return result;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Optimized (Vector-based Stack) Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Instead of using an explicit stack<int>, treat a vector as a dynamic stack.
+Push each asteroid into the vector.
+When a collision occurs (top > 0 and current < 0), compare their absolute values:
+
+If top is smaller, pop it and recheck.
+If both are equal, pop top and discard current.
+
+If top is larger, discard current.
+This avoids stack overhead and keeps direct access to the result array.
+
+Complexity
+Time: O(n) (each asteroid enters and leaves the vector once)
+Space: O(n) (vector acting as stack)
+
+Code
+
+class Solution {
+public:
+    vector<int> asteroidCollision(vector<int>& asteroids) {
+        vector<int> st;
+
+        for(int a : asteroids)
+        {
+            bool destroyed = false;
+
+            while(!st.empty() && st.back() > 0 && a < 0)
+            {
+                if(abs(st.back()) < abs(a))
+                {
+                    st.pop_back();
+                    continue;
+                }
+                else if(abs(st.back()) == abs(a))
+                {
+                    st.pop_back();
+                }
+                destroyed = true;
+                break;
+            }
+
+            if(!destroyed)
+                st.push_back(a);
+        }
+
+        return st;
+    }
+};

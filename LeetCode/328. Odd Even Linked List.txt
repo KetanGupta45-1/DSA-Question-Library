@@ -1,0 +1,144 @@
+Approach (a): Making Odd List and Even List Separately
+-------------------------------------------------------------------------------------------------
+
+Explanation:
+Traverse the linked list once while maintaining two separate lists — one for odd indices and one for even indices.
+Keep pointers oddHead and evenHead to track the start of both lists.
+Finally, link the end of the odd list to the start of the even list.
+
+Time Complexity: O(n)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    ListNode* oddEvenList(ListNode* head)
+    {
+        if(!head || !head->next)
+            return head;
+
+        ListNode* oddHead = nullptr;
+        ListNode* evenHead = nullptr;
+        ListNode* odd = nullptr;
+        ListNode* even = nullptr;
+        ListNode* temp = head;
+        int index = 1;
+
+        while(temp)
+        {
+            if(index % 2 == 1)
+            {
+                if(!oddHead)
+                    oddHead = odd = temp;
+                else
+                {
+                    odd->next = temp;
+                    odd = odd->next;
+                }
+            }
+            else
+            {
+                if(!evenHead)
+                    evenHead = even = temp;
+                else
+                {
+                    even->next = temp;
+                    even = even->next;
+                }
+            }
+            temp = temp->next;
+            index++;
+        }
+
+        even->next = nullptr;
+        odd->next = evenHead;
+        return oddHead;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach (b): Making Both Odd and Even Lists Together
+-------------------------------------------------------------------------------------------------
+
+Explanation:
+Traverse the list once and decide whether the node goes to odd or even list using a boolean flag.
+Build both lists simultaneously in one pass.
+Finally, connect the odd list to the even list.
+
+Time Complexity: O(n)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    ListNode* oddEvenList(ListNode* head)
+    {
+        if(!head || !head->next)
+            return head;
+
+        ListNode* oddHead = nullptr;
+        ListNode* evenHead = nullptr;
+        ListNode* odd = nullptr;
+        ListNode* even = nullptr;
+        ListNode* temp = head;
+        bool isOdd = true;
+
+        while(temp)
+        {
+            if(isOdd)
+            {
+                if(!oddHead)
+                    oddHead = odd = temp;
+                else
+                {
+                    odd->next = temp;
+                    odd = odd->next;
+                }
+            }
+            else
+            {
+                if(!evenHead)
+                    evenHead = even = temp;
+                else
+                {
+                    even->next = temp;
+                    even = even->next;
+                }
+            }
+            temp = temp->next;
+            isOdd = !isOdd;
+        }
+
+        if(even)
+            even->next = nullptr;
+
+        odd->next = evenHead;
+        return oddHead;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach (c): Recursive
+-------------------------------------------------------------------------------------------------
+
+Explanation:
+Base case — if fewer than 3 nodes remain, no rearrangement needed.
+Recursively rearrange the sublist starting from the 3rd node.
+Adjust links so that the current even node is placed after the returned rearranged odd list.
+
+Time Complexity: O(n)
+Space Complexity: O(n) (recursion stack)
+
+class Solution {
+public:
+    ListNode* oddEvenList(ListNode* head)
+    {
+        if(!head || !head->next || !head->next->next)
+            return head;
+
+        ListNode* even = head->next;
+        head->next = oddEvenList(head->next->next);
+        even->next = head->next->next;
+        head->next->next = even;
+
+        return head;
+    }
+};
