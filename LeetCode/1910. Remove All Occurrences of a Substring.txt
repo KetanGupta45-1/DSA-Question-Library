@@ -1,0 +1,122 @@
+Brute-force Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Repeatedly search for the substring part in s using the built-in find() function.
+Whenever found, erase it from s and continue until no more occurrences exist.
+This approach directly removes all appearances of part one by one from left to right.
+
+Complexity
+Time: O(n²) (each erase and find can take linear time in worst case)
+Space: O(1) (in-place modification of the string)
+
+Code
+
+class Solution {
+public:
+    string removeOccurrences(string s, string part) {
+        while(s.find(part) != string::npos)
+        {
+            int pos = s.find(part);
+            s.erase(pos, part.size());
+        }
+        return s;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Stack-based Approach (Efficient and Intuitive)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use a string ans as a stack to build the result character by character.
+For each character in s, push it into ans.
+Whenever the last n characters of ans form the substring part, remove them (simulating a pop of multiple characters).
+This ensures all occurrences are removed efficiently in one pass.
+
+Complexity
+Time: O(n × m) in worst case (checking substrings repeatedly) but typically O(n).
+Space: O(n) (for the ans string used as stack).
+
+Code
+
+class Solution {
+public:
+    string removeOccurrences(string s, string part) {
+        int n = part.size();
+        string ans = "";
+
+        for(int i = 0; i < s.size(); i++)
+        {
+            ans += s[i];
+            int x = ans.size();
+
+            if(x >= n)
+            {
+                string sub = ans.substr(x - n);
+                if(sub == part)
+                    ans.erase(x - n, n);
+            }
+        }
+
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+KMP-based Optimized Approach (Pattern Matching)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use the KMP (Knuth–Morris–Pratt) string matching algorithm to efficiently detect occurrences of part in s.
+KMP uses a prefix-function (lps array) to avoid redundant comparisons while scanning the string.
+Whenever a complete match is found, simulate an erase by adjusting indices instead of rebuilding the string every time.
+This approach is ideal for large strings and repetitive patterns.
+
+Complexity
+Time: O(n + m) (linear scan using prefix table)
+Space: O(m) (prefix table of pattern part)
+
+Code
+
+class Solution {
+public:
+    string removeOccurrences(string s, string part) {
+        int n = part.size();
+        vector<int> lps(n);
+        for(int i = 1, len = 0; i < n; )
+        {
+            if(part[i] == part[len])
+                lps[i++] = ++len;
+            else if(len)
+                len = lps[len - 1];
+            else
+                lps[i++] = 0;
+        }
+
+        string res;
+        vector<int> match;
+        for(char c : s)
+        {
+            res.push_back(c);
+            int j = match.empty() ? 0 : match.back();
+
+            while(j > 0 && c != part[j])
+                j = lps[j - 1];
+
+            if(c == part[j]) j++;
+
+            match.push_back(j);
+
+            if(j == n)
+            {
+                for(int k = 0; k < n; k++)
+                {
+                    res.pop_back();
+                    match.pop_back();
+                }
+            }
+        }
+        return res;
+    }
+};

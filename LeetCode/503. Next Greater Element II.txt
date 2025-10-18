@@ -1,0 +1,72 @@
+Brute-force Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+For each element, look to its right (and wrap around circularly) to find the next greater element.
+Use two nested loops — the outer loop fixes an element, and the inner loop searches the next greater one by scanning ahead (with modulo for circular traversal).
+If no greater element is found, leave the answer as -1.
+
+Complexity
+Time: O(n²) (each element compared with all others in worst case)
+Space: O(1) (no extra data structures used except result array)
+
+Code
+
+class Solution {
+public:
+    vector<int> nextGreaterElements(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> ans(n, -1);
+
+        for(int i = 0; i < n; i++)
+        {
+            for(int j = 1; j < n; j++)
+            {
+                int idx = (i + j) % n;
+                if(nums[idx] > nums[i])
+                {
+                    ans[i] = nums[idx];
+                    break;
+                }
+            }
+        }
+
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Optimized (Monotonic Stack) Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use a monotonic decreasing stack to efficiently find the next greater element in a circular array.
+Iterate twice through the array (2*n − 1 to 0) to simulate the circular nature.
+While the stack’s top ≤ current element, pop it (since it cannot be a next greater).
+If the stack isn’t empty, its top is the next greater element.
+Push the current element onto the stack for future comparisons.
+
+Complexity
+Time: O(n) (each element pushed/popped at most once)
+Space: O(n) (stack and result array)
+
+Code
+
+class Solution {
+public:
+    vector<int> nextGreaterElements(vector<int>& nums) {
+        int n = nums.size();
+        stack<int> st;
+        vector<int> ans(n, -1);
+
+        for(int i = 2*n - 1; i >= 0; i--)
+        {
+            int j = i % n;
+            while(!st.empty() && st.top() <= nums[j])
+                st.pop();
+
+            if(!st.empty())
+                ans[j] = st.top();
+
+            st.push(nums[j]);
+        }

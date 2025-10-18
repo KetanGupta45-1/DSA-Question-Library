@@ -1,0 +1,140 @@
+Brute-force Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Try removing one digit at a time in all possible ways until k digits are removed.
+At each step, pick the configuration that gives the smallest numerical value.
+This is done by iterating through all possible deletions of k digits and comparing results.
+Though conceptually simple, it’s computationally infeasible for large inputs.
+
+Complexity
+Time: O(n × C(n, k)) (exponential due to all combinations of deletions)
+Space: O(n) (temporary strings for each deletion)
+
+Code
+
+class Solution {
+public:
+    string removeKdigits(string num, int k) {
+        if(k == 0) return num;
+        if(k >= num.size()) return "0";
+
+        string ans = num;
+        for(int i = 0; i < k; i++)
+        {
+            int idx = 0;
+            while(idx + 1 < ans.size() && ans[idx] <= ans[idx + 1])
+                idx++;
+            ans.erase(ans.begin() + idx);
+        }
+
+        int j = 0;
+        while(j < ans.size() && ans[j] == '0') j++;
+        ans = ans.substr(j);
+
+        return ans.empty() ? "0" : ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Optimized (Stack-based Monotonic) Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use a monotonic increasing stack to keep digits in order.
+Iterate through each digit — while the current digit is smaller than the top of the stack and we still have k removals left, pop the stack.
+Push the current digit into the stack and remove remaining digits if k > 0 after traversal.
+Finally, remove leading zeros and reverse the stack to get the result.
+
+Complexity
+Time: O(n) (each digit pushed and popped at most once)
+Space: O(n) (stack to hold digits)
+
+Code
+
+class Solution {
+public:
+    string removeKdigits(string num, int k) {
+        stack<char> st;
+
+        for(char ele : num)
+        {
+            while(!st.empty() && k > 0 && st.top() > ele)
+            {
+                st.pop();
+                k--;
+            }
+            st.push(ele);
+        }
+
+        while(k > 0 && !st.empty())
+        {
+            st.pop();
+            k--;
+        }
+
+        string res = "";
+        while(!st.empty())
+        {
+            res += st.top();
+            st.pop();
+        }
+
+        reverse(res.begin(), res.end());
+
+        int i = 0;
+        while(i < res.size() && res[i] == '0')
+            i++;
+
+        res = res.substr(i);
+
+        return res.empty() ? "0" : res;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Optimized (String-based Greedy) Approach
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Instead of an explicit stack, treat the result string as a dynamic container.
+For each digit, pop the last digit from res while it’s greater than the current digit and you still have deletions left.
+Append the current digit, ensuring digits stay as small as possible from left to right.
+Remove leading zeros and return "0" if the result becomes empty.
+
+Complexity
+Time: O(n) (single pass with possible backward pops)
+Space: O(n) (result string acts as stack)
+
+Code
+
+class Solution {
+public:
+    string removeKdigits(string num, int k) {
+        string res = "";
+
+        for(char c : num)
+        {
+            while(!res.empty() && k > 0 && res.back() > c)
+            {
+                res.pop_back();
+                k--;
+            }
+            res.push_back(c);
+        }
+
+        while(k > 0 && !res.empty())
+        {
+            res.pop_back();
+            k--;
+        }
+
+        int i = 0;
+        while(i < res.size() && res[i] == '0')
+            i++;
+
+        res = res.substr(i);
+
+        return res.empty() ? "0" : res;
+    }
+};
