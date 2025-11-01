@@ -1,0 +1,125 @@
+Approach (a): Direct Simulation (Using Vector for Balances)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Store all account balances in a vector bank_balance.
+For each operation (transfer, deposit, withdraw), first validate account indices.
+For transfer, check balance of account1 before deducting and crediting account2.
+For deposit, simply add money to the account.
+For withdraw, ensure sufficient funds before deduction.
+
+Complexity
+Time: O(1) per operation
+Space: O(n)
+
+class Bank {
+public:
+    vector<long long> bank_balance;
+
+    Bank(vector<long long>& balance)
+    {
+        bank_balance = balance;
+    }
+
+    bool valid(int account)
+    {
+        return account >= 1 && account <= bank_balance.size();
+    }
+
+    bool transfer(int account1, int account2, long long money)
+    {
+        if(!valid(account1) || !valid(account2))
+            return false;
+
+        int idx1 = account1 - 1;
+        int idx2 = account2 - 1;
+
+        if(bank_balance[idx1] < money)
+            return false;
+
+        bank_balance[idx1] -= money;
+        bank_balance[idx2] += money;
+        return true;
+    }
+
+    bool deposit(int account, long long money)
+    {
+        if(!valid(account))
+            return false;
+        bank_balance[account - 1] += money;
+        return true;
+    }
+
+    bool withdraw(int account, long long money)
+    {
+        if(!valid(account))
+            return false;
+
+        int idx = account - 1;
+        if(bank_balance[idx] < money)
+            return false;
+
+        bank_balance[idx] -= money;
+        return true;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach (b): Map-Based Implementation (Alternative Flexible Design)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use an unordered_map<int, long long> to store account numbers and their balances.
+This allows dynamic account creation and lookup (useful when account numbers are sparse).
+Each operation performs O(1) average time lookup using the map.
+Logic for transfer, deposit, and withdraw remains the same as vector version.
+
+Complexity
+Time: O(1) average per operation
+Space: O(n)
+
+class Bank {
+public:
+    unordered_map<int, long long> balance;
+
+    Bank(vector<long long>& initial)
+    {
+        for(int i = 0; i < initial.size(); i++)
+            balance[i + 1] = initial[i];
+    }
+
+    bool valid(int account)
+    {
+        return balance.count(account);
+    }
+
+    bool transfer(int account1, int account2, long long money)
+    {
+        if(!valid(account1) || !valid(account2))
+            return false;
+        if(balance[account1] < money)
+            return false;
+
+        balance[account1] -= money;
+        balance[account2] += money;
+        return true;
+    }
+
+    bool deposit(int account, long long money)
+    {
+        if(!valid(account))
+            return false;
+        balance[account] += money;
+        return true;
+    }
+
+    bool withdraw(int account, long long money)
+    {
+        if(!valid(account))
+            return false;
+        if(balance[account] < money)
+            return false;
+        balance[account] -= money;
+        return true;
+    }
+};

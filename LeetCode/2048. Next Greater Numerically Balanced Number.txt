@@ -1,0 +1,115 @@
+Approach (a): Brute Force Checking
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Start from n + 1 and incrementally check each number until finding one that satisfies the balanced number condition.
+A balanced number is defined as one where every digit d appears exactly d times.
+For each candidate number, count digit frequencies and verify the condition.
+Stop once the first valid number is found.
+
+Complexity
+Time: O((m − n) * log₁₀(m)) (can be large since each number is checked)
+Space: O(1)
+
+class Solution {
+public:
+    bool balanced(int n)
+    {
+        vector<int> freq(10, 0);
+        while(n)
+        {
+            freq[n % 10]++;
+            n /= 10;
+        }
+        for(int i = 0; i < 10; i++)
+            if(freq[i] > 0 && freq[i] != i)
+                return false;
+        return true;
+    }
+
+    int nextBeautifulNumber(int n)
+    {
+        for(int i = n + 1; i <= 1224444; i++)
+            if(balanced(i))
+                return i;
+        return -1;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach (b): Precompute All Balanced Numbers
+-------------------------------------------------------------------------------------------------
+
+Explanation
+The maximum possible “beautiful number” is 1224444, so the space of valid numbers is very small.
+Precompute all balanced numbers once and store them in a sorted vector.
+For a given input n, find the smallest precomputed number that’s greater than n using linear or binary search.
+This makes queries instantaneous.
+
+Complexity
+Time: O(1) per query (after precomputation)
+Space: O(k) — k = number of balanced numbers (~12)
+
+class Solution {
+public:
+    int nextBeautifulNumber(int n)
+    {
+        vector<int> beautiful = {1, 22, 122, 333, 1333, 4444, 14444, 22333, 55555, 122333, 155555, 224444, 666666, 1224444};
+        for(int x : beautiful)
+            if(x > n)
+                return x;
+        return -1;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach (c): Backtracking / Permutation Generation
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Generate all possible digit combinations that satisfy the balanced property directly (e.g., 1, 22, 122, 333, etc.).
+Use backtracking to build valid numbers by appending digits only when their count ≤ their value.
+Store all valid numbers, sort them, and return the smallest one greater than n.
+Avoid brute-force checking of invalid combinations.
+
+Complexity
+Time: O(k log k) to sort all generated balanced numbers (k ≈ few hundreds)
+Space: O(k)
+
+class Solution {
+public:
+    vector<int> all;
+
+    void backtrack(string curr, vector<int>& cnt)
+    {
+        if(!curr.empty())
+        {
+            int num = stoi(curr);
+            if(num <= 1224444)
+                all.push_back(num);
+        }
+
+        for(int d = 1; d <= 7; d++)
+        {
+            if(cnt[d] < d)
+            {
+                cnt[d]++;
+                backtrack(curr + to_string(d), cnt);
+                cnt[d]--;
+            }
+        }
+    }
+
+    int nextBeautifulNumber(int n)
+    {
+        vector<int> cnt(10, 0);
+        backtrack("", cnt);
+        sort(all.begin(), all.end());
+        all.erase(unique(all.begin(), all.end()), all.end());
+
+        for(int x : all)
+            if(x > n)
+                return x;
+        return -1;
+    }
+};

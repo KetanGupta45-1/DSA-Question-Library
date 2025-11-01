@@ -1,0 +1,37 @@
+Hash Map + Greedy Simulation (Alternative)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Instead of using a fixed-size vector, store remainder frequencies in an unordered_map (useful when value is large).
+For each integer x in nums, compute remainder (x % value + value) % value and count it in the map.
+Increment ans starting from 0 until you find the first integer whose remainder has no remaining count in the map.
+Decrease remainder counts greedily as you consume them.
+
+Complexity
+Time: O(n + ans)
+Space: O(n) (in worst case, all remainders distinct)
+
+class Solution {
+public:
+    int findSmallestInteger(vector<int>& nums, int value)
+    {
+        unordered_map<int, int> freq;
+        for(int x : nums)
+        {
+            int r = ((x % value) + value) % value;
+            freq[r]++;
+        }
+
+        int ans = 0;
+        while(true)
+        {
+            int r = ans % value;
+            if(freq[r] == 0)
+                return ans;
+            freq[r]--;
+            ans++;
+        }
+
+        return ans;
+    }
+};

@@ -1,0 +1,79 @@
+Approach (a): Counting Devices per Row (Optimized Linear Approach)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Traverse each row from bottom (or top) and count the number of '1's in it.
+If a row has nonzero devices (curr > 0), multiply it with the previous nonzero row’s count to get laser beams.
+Update the previous count for next iteration.
+Skip rows with zero devices (since no beams possible).
+
+Complexity
+Time: O(m * n) (each cell visited once)
+Space: O(1)
+
+class Solution {
+public:
+    int numberOfBeams(vector<string>& bank)
+    {
+        int m = bank.size();
+        int ans = 0;
+        int prev = 0;
+
+        for(int i = m - 1; i >= 0; i--)
+        {
+            int curr = 0;
+            for(char c : bank[i])
+            {
+                if(c == '1')
+                    curr++;
+            }
+
+            if(curr > 0)
+            {
+                ans += prev * curr;
+                prev = curr;
+            }
+        }
+
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach (b): Precomputing Device Counts (Two-Pass Approach)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+First pass — count devices ('1') in each row and store in an array.
+Second pass — traverse that array and for each nonzero row, multiply with the previous nonzero to get total beams.
+This avoids recounting during the main loop and separates logic cleanly.
+
+Complexity
+Time: O(m * n) (still linear over grid size)
+Space: O(m) (for device count array)
+
+class Solution {
+public:
+    int numberOfBeams(vector<string>& bank)
+    {
+        int m = bank.size();
+        vector<int> deviceCount(m, 0);
+
+        for(int i = 0; i < m; i++)
+            for(char c : bank[i])
+                if(c == '1')
+                    deviceCount[i]++;
+
+        int ans = 0, prev = 0;
+        for(int i = 0; i < m; i++)
+        {
+            if(deviceCount[i] > 0)
+            {
+                ans += prev * deviceCount[i];
+                prev = deviceCount[i];
+            }
+        }
+
+        return ans;
+    }
+};

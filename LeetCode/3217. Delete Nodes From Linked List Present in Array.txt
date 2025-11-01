@@ -1,0 +1,74 @@
+Approach (a): Hash-Based Filtering (Using Unordered Map)
+-------------------------------------------------------------------------------------------------
+
+Logic
+Store all numbers from nums in a hash map for O(1) lookup.
+Skip initial nodes whose values exist in the map (adjust head).
+Traverse the list and for each node, check if the next node’s value exists in the map:
+If yes, unlink it (temp->next = temp->next->next).
+If not, move to next node.
+Return the modified head.
+
+Complexity
+Time: O(n + m) → n = size of list, m = size of nums
+Space: O(m)
+
+class Solution {
+public:
+    bool check(unordered_map<int, int>& map, int x)
+    {
+        return map.count(x);
+    }
+
+    ListNode* modifiedList(vector<int>& nums, ListNode* head)
+    {
+        unordered_map<int, int> map;
+        for(int x : nums)
+            map[x]++;
+
+        while(head && check(map, head->val))
+            head = head->next;
+
+        ListNode* temp = head;
+
+        while(temp && temp->next)
+        {
+            if(check(map, temp->next->val))
+                temp->next = temp->next->next;
+            else
+                temp = temp->next;
+        }
+
+        return head;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach (b): Cleaner Set-Based Variant (Simplified & Memory Efficient)
+-------------------------------------------------------------------------------------------------
+
+If you don’t need frequency, a unordered_set works better.
+No need for a separate check() function.
+
+class Solution {
+public:
+    ListNode* modifiedList(vector<int>& nums, ListNode* head)
+    {
+        unordered_set<int> st(nums.begin(), nums.end());
+
+        while(head && st.count(head->val))
+            head = head->next;
+
+        ListNode* temp = head;
+
+        while(temp && temp->next)
+        {
+            if(st.count(temp->next->val))
+                temp->next = temp->next->next;
+            else
+                temp = temp->next;
+        }
+
+        return head;
+    }
+};
