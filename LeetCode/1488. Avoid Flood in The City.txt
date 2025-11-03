@@ -1,0 +1,118 @@
+Approach 1: Brute Force Simulation 🧩
+-------------------------------------------------------------------------------------------------
+
+Idea:
+Keep track of which lakes are currently full using a set.
+When it rains on lake x:
+If lake x is already full → flood → return {}.
+Otherwise mark it full.
+When it’s a dry day (0):
+Look ahead for the nearest future rain on any currently full lake.
+Dry that lake before it rains again.
+If no such lake exists, dry any arbitrary lake (e.g., 1).
+
+Time Complexity: O(n²)
+→ For each dry day, we scan future elements to decide which lake to dry.
+Space Complexity: O(n)
+→ To store which lakes are currently full.
+
+Code:
+
+class Solution {
+public:
+    vector<int> avoidFlood(vector<int>& rains)
+    {
+        int n = rains.size();
+        vector<int> ans(n, 1);
+        unordered_set<int> full;
+
+        for(int i = 0; i < n; i++)
+        {
+            if(rains[i] > 0)
+            {
+                if(full.count(rains[i]))
+                    return {};
+                full.insert(rains[i]);
+                ans[i] = -1;
+            }
+            else
+            {
+                bool found = false;
+                for(int j = i + 1; j < n; j++)
+                {
+                    if(full.count(rains[j]))
+                    {
+                        ans[i] = rains[j];
+                        full.erase(rains[j]);
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
+                    ans[i] = 1;
+            }
+        }
+
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Greedy + Set + HashMap (Optimized ✅)
+-------------------------------------------------------------------------------------------------
+
+Idea:
+Use two data structures:
+unordered_map<int,int> lastRain → stores last day a lake was filled.
+set<int> dryDays → stores indices of all dry days available to use.
+Iterate over days:
+If it rains on lake:
+If lake was already full earlier, we need to dry it before this day.
+Use dryDays.upper_bound(lastRain[lake]) to find the earliest available dry day after it was last filled.
+If no such dry day exists → impossible → return {}.
+Otherwise, assign that dry day to dry this lake and remove it from the set.
+If it’s a dry day (0), store its index in dryDays.
+
+Time Complexity: O(n log n)
+→ Due to ordered set lookups and erasures.
+Space Complexity: O(n)
+
+class Solution {
+public:
+    vector<int> avoidFlood(vector<int>& rains)
+    {
+        unordered_map<int, int> lastRain;
+        set<int> dryDays;
+        int n = rains.size();
+        vector<int> ans(n, 1);
+
+        for(int i = 0; i < n; i++)
+        {
+            int lake = rains[i];
+
+            if(lake == 0)
+            {
+                dryDays.insert(i);
+                continue;
+            }
+
+            ans[i] = -1;
+
+            if(lastRain.count(lake))
+            {
+                int prev = lastRain[lake];
+                auto it = dryDays.upper_bound(prev);
+                if(it == dryDays.end())
+                    return {};
+
+                int dryDay = *it;
+                ans[dryDay] = lake;
+                dryDays.erase(it);
+            }
+
+            lastRain[lake] = i;
+        }
+
+        return ans;
+    }
+};

@@ -1,0 +1,71 @@
+Approach (a): Two-Pointer / Grouping (Your Code — Optimal)
+-------------------------------------------------------------------------------------------------
+
+Logic
+Use two pointers i and j to group consecutive balloons with the same color.
+For each group:
+Compute sum of all removal costs.
+Keep maxi as the max removal cost in that group.
+We must remove all but one (the highest cost one), so add (sum - maxi) to ans.
+Move to the next group.
+Return total ans.
+
+Time Complexity: O(n)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    int minCost(string colors, vector<int>& needed)
+    {
+        int n = colors.size();
+        int ans = 0, i = 0;
+
+        while(i < n)
+        {
+            int j = i + 1;
+            int sum = needed[i];
+            int maxi = needed[i];
+
+            while(j < n && colors[i] == colors[j])
+            {
+                sum += needed[j];
+                maxi = max(maxi, needed[j]);
+                j++;
+            }
+
+            ans += (sum - maxi);
+            i = j;
+        }
+
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach (b): Single-Pass with Adjacent Comparison
+-------------------------------------------------------------------------------------------------
+
+Logic
+Instead of grouping, just check adjacent same-colored balloons.
+If colors[i] == colors[i-1], remove one with smaller cost.
+Keep track of max cost in place.
+
+Time Complexity: O(n)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    int minCost(string colors, vector<int>& needed)
+    {
+        int ans = 0;
+        for(int i = 1; i < colors.size(); i++)
+        {
+            if(colors[i] == colors[i-1])
+            {
+                ans += min(needed[i], needed[i-1]);
+                needed[i] = max(needed[i], needed[i-1]);
+            }
+        }
+        return ans;
+    }
+};
