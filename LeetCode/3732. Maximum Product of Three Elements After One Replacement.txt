@@ -1,0 +1,117 @@
+Approach 1: Brute Force (All Triplets)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Compute the product of every possible triplet (i, j, k) where i < j < k.
+Keep track of the maximum product found.
+Simple to implement but inefficient for large n.
+
+Complexity
+Time: O(n³) — checks all triplets.
+Space: O(1)
+
+class Solution {
+public:
+    long long maxProduct(vector<int>& nums)
+    {
+        int n = nums.size();
+        long long ans = LLONG_MIN;
+
+        for(int i = 0; i < n; i++)
+        {
+            for(int j = i + 1; j < n; j++)
+            {
+                for(int k = j + 1; k < n; k++)
+                {
+                    long long prod = 1LL * nums[i] * nums[j] * nums[k];
+                    ans = max(ans, prod);
+                }
+            }
+        }
+
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Sorting-Based
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Sort the array.
+The maximum product of three numbers can come from either:
+Three largest numbers → nums[n-1] * nums[n-2] * nums[n-3]
+Two smallest (most negative) and the largest positive → nums[0] * nums[1] * nums[n-1]
+Return the maximum of the two.
+
+Complexity
+Time: O(n log n)
+Space: O(1)
+
+class Solution {
+public:
+    long long maxProduct(vector<int>& nums)
+    {
+        sort(nums.begin(), nums.end());
+        int n = nums.size();
+
+        long long prod1 = 1LL * nums[n - 1] * nums[n - 2] * nums[n - 3];
+        long long prod2 = 1LL * nums[0] * nums[1] * nums[n - 1];
+
+        return max(prod1, prod2);
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 3: Single-Pass (Track Top & Bottom Values)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Instead of sorting, track:
+Top three maximums: max1 ≥ max2 ≥ max3
+Bottom two minimums: min1 ≤ min2
+The answer is max(max1 * max2 * max3, min1 * min2 * max1)
+Works efficiently in one pass without sorting.
+
+Complexity
+Time: O(n)
+Space: O(1)
+
+class Solution {
+public:
+    long long maxProduct(vector<int>& nums)
+    {
+        long long max1 = LLONG_MIN, max2 = LLONG_MIN, max3 = LLONG_MIN;
+        long long min1 = LLONG_MAX, min2 = LLONG_MAX;
+
+        for(int x : nums)
+        {
+            if(x > max1)
+            {
+                max3 = max2;
+                max2 = max1;
+                max1 = x;
+            }
+            else if(x > max2)
+            {
+                max3 = max2;
+                max2 = x;
+            }
+            else if(x > max3)
+                max3 = x;
+
+            if(x < min1)
+            {
+                min2 = min1;
+                min1 = x;
+            }
+            else if(x < min2)
+                min2 = x;
+        }
+
+        long long prod1 = max1 * max2 * max3;
+        long long prod2 = min1 * min2 * max1;
+
+        return max(prod1, prod2);
+    }
+};

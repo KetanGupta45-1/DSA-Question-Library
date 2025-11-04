@@ -1,0 +1,89 @@
+Approach 1: Backtracking (Recursive DFS)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+We need to find all combinations of k distinct numbers (1–9) that sum to n.
+Use a recursive DFS helper to explore all number choices.
+At each step:
+If current combination length = k → check if sum = n → store it.
+Otherwise, iterate from current start to 9, try including number i, and recurse.
+Use pruning: stop early if sum + i > n.
+
+Complexity
+Time: O(C(9, k)) → Each valid subset of {1,…,9} considered.
+Space: O(k) recursion stack depth.
+
+class Solution {
+public:
+    vector<vector<int>> ans;
+
+    void helper(int start, int k, int n, int sum, vector<int> &temp)
+    {
+        if(temp.size() == k)
+        {
+            if(sum == n)
+                ans.push_back(temp);
+            return;
+        }
+
+        for(int i = start; i <= 9; i++)
+        {
+            if(sum + i > n)
+                break;
+
+            temp.push_back(i);
+            helper(i + 1, k, n, sum + i, temp);
+            temp.pop_back();
+        }
+    }
+
+    vector<vector<int>> combinationSum3(int k, int n)
+    {
+        vector<int> temp;
+        helper(1, k, n, 0, temp);
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Bitmask Enumeration
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Since numbers are from 1 to 9, we can represent each subset using a 9-bit bitmask (0–511).
+For each bitmask:
+Collect numbers whose bits are set.
+If number count == k and sum == n → add to answer.
+This approach eliminates recursion and explores all subsets directly.
+
+Complexity
+Time: O(2⁹) = O(512) (constant upper bound).
+Space: O(1) (apart from output list).
+
+class Solution {
+public:
+    vector<vector<int>> combinationSum3(int k, int n)
+    {
+        vector<vector<int>> ans;
+
+        for(int mask = 0; mask < (1 << 9); mask++)
+        {
+            vector<int> temp;
+            int sum = 0;
+
+            for(int i = 0; i < 9; i++)
+            {
+                if(mask & (1 << i))
+                {
+                    temp.push_back(i + 1);
+                    sum += i + 1;
+                }
+            }
+
+            if(temp.size() == k && sum == n)
+                ans.push_back(temp);
+        }
+
+        return ans;
+    }
+};
