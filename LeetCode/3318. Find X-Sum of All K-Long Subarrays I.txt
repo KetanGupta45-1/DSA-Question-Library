@@ -1,0 +1,119 @@
+Approach 1: Brute Force (Recompute Frequencies for Each Window)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+For each subarray (window) of size k, build a frequency map from scratch.
+Sort the frequency pairs {num, count} in descending order of frequency (and by number if tied).
+Take the top x elements and compute their contribution as num * frequency.
+Repeat for all windows.
+
+Complexity
+Time: O(n × k log k) — for each window, sorting takes O(k log k).
+Space: O(k) — frequency map and temporary vectors.
+
+class Solution {
+public:
+    static bool comp(pair<int, int> a, pair<int, int> b)
+    {
+        if(a.second == b.second)
+            return a.first > b.first;
+        return a.second > b.second;
+    }
+
+    vector<int> findXSum(vector<int>& nums, int k, int x)
+    {
+        int n = nums.size();
+        vector<int> ans;
+
+        for(int i = 0; i + k <= n; i++)
+        {
+            unordered_map<int, int> mp;
+            for(int j = i; j < i + k; j++)
+                mp[nums[j]]++;
+
+            vector<pair<int, int>> freq(mp.begin(), mp.end());
+            sort(freq.begin(), freq.end(), comp);
+
+            int sum = 0;
+            for(int t = 0; t < freq.size() && t < x; t++)
+                sum += freq[t].first * freq[t].second;
+
+            ans.push_back(sum);
+        }
+
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Optimized Sliding Window + Frequency Map (Your Code ✅)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use a sliding window to maintain frequencies dynamically while moving through the array.
+Maintain unordered_map<int, int> mp for the current window.
+When the window reaches size k,
+Extract top x frequent numbers using a helper (find_freq).
+Compute their weighted sum.
+Before sliding to the next window, remove the frequency of the outgoing element.
+Sorting only the unique elements in each window instead of rebuilding the entire map reduces overhead.
+
+Complexity
+Time: O(n × m log m), where m = number of unique elements per window (typically much smaller than k).
+Space: O(m)
+
+class Solution {
+public:
+    static bool comp(pair<int, int> a, pair<int, int> b)
+    {
+        if(a.second == b.second)
+            return a.first > b.first;
+        return a.second > b.second;
+    }
+
+    vector<int> find_freq(unordered_map<int, int>& mp, int x)
+    {
+        vector<pair<int, int>> v;
+        for(auto& it : mp)
+            v.push_back({it.first, it.second});
+
+        sort(v.begin(), v.end(), comp);
+
+        vector<int> ans;
+        for(int i = 0; i < v.size() && i < x; i++)
+            ans.push_back(v[i].first);
+
+        return ans;
+    }
+
+    vector<int> findXSum(vector<int>& nums, int k, int x)
+    {
+        int n = nums.size();
+        vector<int> ans;
+        unordered_map<int, int> mp;
+        int i = 0;
+
+        for(int j = 0; j < n; j++)
+        {
+            mp[nums[j]]++;
+
+            if(j - i + 1 == k)
+            {
+                vector<int> topx = find_freq(mp, x);
+                int sum = 0;
+
+                for(auto val : topx)
+                    sum += val * mp[val];
+
+                ans.push_back(sum);
+
+                mp[nums[i]]--;
+                if(mp[nums[i]] == 0)
+                    mp.erase(nums[i]);
+                i++;
+            }
+        }
+
+        return ans;
+    }
+};

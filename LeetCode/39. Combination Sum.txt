@@ -1,0 +1,103 @@
+Approach 1: Brute Force (No Pruning)
+-------------------------------------------------------------------------------------------------
+
+Idea:
+Try every possible combination of numbers by recursively picking each candidate any number of times until the sum exceeds or equals the target.
+No sorting, no pruning — pure exploration of all paths.
+
+Steps:
+Start from index idx = 0.
+For each candidate:
+Add it to the current combination.
+Recurse with the same index (i) because numbers can be reused.
+Backtrack after recursion.
+If sum exceeds target, stop exploring that path.
+
+Complexity:
+Time: Exponential — O(2^n) in worst case (many combinations).
+Space: O(target / min(candidates)) due to recursion depth.
+
+class Solution {
+public:
+    vector<vector<int>> ans;
+    int n;
+
+    void helper(vector<int>& candidates, int target, vector<int>& temp, int sum, int idx)
+    {
+        if(sum > target)
+            return;
+
+        if(sum == target)
+        {
+            ans.push_back(temp);
+            return;
+        }
+
+        for(int i = idx; i < n; i++)
+        {
+            temp.push_back(candidates[i]);
+            helper(candidates, target, temp, sum + candidates[i], i);
+            temp.pop_back();
+        }
+    }
+
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target)
+    {
+        n = candidates.size();
+        vector<int> temp;
+        helper(candidates, target, temp, 0, 0);
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Optimized Backtracking (with Sorting + Pruning)
+-------------------------------------------------------------------------------------------------
+
+Idea:
+Sort candidates first so that if sum + candidates[i] > target, we can stop early — later elements are even larger.
+This cuts off unnecessary recursion and speeds up execution drastically.
+
+Steps:
+Sort the array.
+Use recursion to explore combinations starting from index idx.
+If current sum exceeds target → stop exploring further (since sorted).
+Use same index again because we can reuse elements.
+
+Complexity:
+Time: Better than brute force, roughly O(k × 2ⁿ) but pruned early.
+Space: O(target / min(candidates)).
+
+class Solution {
+public:
+    vector<vector<int>> ans;
+    int n;
+
+    void helper(vector<int>& candidates, int target, vector<int>& temp, int sum, int idx)
+    {
+        if(sum == target)
+        {
+            ans.push_back(temp);
+            return;
+        }
+
+        for(int i = idx; i < n; i++)
+        {
+            if(sum + candidates[i] > target)
+                break;
+
+            temp.push_back(candidates[i]);
+            helper(candidates, target, temp, sum + candidates[i], i);
+            temp.pop_back();
+        }
+    }
+
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target)
+    {
+        sort(candidates.begin(), candidates.end());
+        n = candidates.size();
+        vector<int> temp;
+        helper(candidates, target, temp, 0, 0);
+        return ans;
+    }
+};
