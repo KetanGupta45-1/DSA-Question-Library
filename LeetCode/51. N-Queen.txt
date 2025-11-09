@@ -1,0 +1,230 @@
+Approach 1: Brute Force (Try All Boards)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Generate all possible placements of n queens on an n × n board.
+For each configuration, check if no two queens attack each other (same row, column, or diagonal).
+This requires validating each full board before storing it.
+Extremely inefficient, as it explores n^n total placements.
+
+Complexity
+Time: O(nⁿ × n²) — each configuration checked for validity.
+Space: O(n²)
+
+class Solution {
+public:
+    vector<vector<string>> ans;
+
+    bool safe(vector<string>& board, int row, int col, int n)
+    {
+        for(int i = 0; i < row; i++)
+            if(board[i][col] == 'Q') return false;
+
+        for(int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--)
+            if(board[i][j] == 'Q') return false;
+
+        for(int i = row - 1, j = col + 1; i >= 0 && j < n; i--, j++)
+            if(board[i][j] == 'Q') return false;
+
+        return true;
+    }
+
+    void brute(vector<string>& board, int row, int n)
+    {
+        if(row == n)
+        {
+            ans.push_back(board);
+            return;
+        }
+
+        for(int col = 0; col < n; col++)
+        {
+            if(safe(board, row, col, n))
+            {
+                board[row][col] = 'Q';
+                brute(board, row + 1, n);
+                board[row][col] = '.';
+            }
+        }
+    }
+
+    vector<vector<string>> solveNQueens(int n)
+    {
+        vector<string> board(n, string(n, '.'));
+        brute(board, 0, n);
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Backtracking with Column and Diagonal Tracking (Your Approach ✅)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use recursion row by row.
+Maintain:
+col_map[col] to mark used columns.
+Diagonal checks done manually in check().
+Place a queen only if it’s safe in both column and diagonals.
+Recurse deeper, backtrack after exploring.
+
+Complexity
+Time: O(n!) (significantly faster than brute force).
+Space: O(n²) (board) + O(n) (column tracking).
+
+class Solution {
+public:
+    vector<vector<string>> ans;
+    int n;
+    vector<int> col_map;
+
+    bool check(vector<string>& board, int row, int col)
+    {
+        int i = row, j = col;
+        while(i >= 0 && j >= 0)
+            if(board[i--][j--] == 'Q') return false;
+
+        i = row; j = col;
+        while(i >= 0 && j < n)
+            if(board[i--][j++] == 'Q') return false;
+
+        return true;
+    }
+
+    void helper(vector<string>& board, int row)
+    {
+        if(row == n)
+        {
+            ans.push_back(board);
+            return;
+        }
+
+        for(int col = 0; col < n; col++)
+        {
+            if(col_map[col] == 0 && check(board, row, col))
+            {
+                col_map[col] = 1;
+                board[row][col] = 'Q';
+                helper(board, row + 1);
+                board[row][col] = '.';
+                col_map[col] = 0;
+            }
+        }
+    }
+
+    vector<vector<string>> solveNQueens(int n)
+    {
+        this->n = n;
+        vector<string> board(n, string(n, '.'));
+        col_map.assign(n, 0);
+        helper(board, 0);
+        return ans;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 3: Bitmask Optimization (Most Efficient ⚡)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Instead of arrays, use bitmasks to mark attacked columns and diagonals.
+For each row, use bitwise operations to find all available positions in one step.
+Recurse by placing a queen in each available spot and updating masks.
+Extremely fast for n ≤ 14 (standard N-Queens constraint).
+
+Complexity
+Time: O(n!) (same theoretical bound, but constants are tiny).
+Space: O(n) recursion depth.
+
+class Solution {
+public:
+    int total = 0;
+    vector<vector<string>> ans;
+
+    void solve(int n, int row, int cols, int diags, int anti, vector<string>& board)
+    {
+        if(row == n)
+        {
+            ans.push_back(board);
+            return;
+        }
+
+        int available = ((1 << n) - 1) & (~(cols | diags | anti));
+
+        while(available)
+        {
+            int pos = available & (-available);
+            available -= pos;
+            int col = __builtin_ctz(pos);
+            board[row][col] = 'Q';
+            solve(n, row + 1, cols | pos, (diags | pos) << 1, (anti | pos) >> 1, board);
+            board[row][col] = '.';
+        }
+    }
+
+    vector<vector<string>> solveNQueens(int n)
+    {
+        vector<string> board(n, string(n, '.'));
+        solve(n, 0, 0, 0, 0, board);
+        return ans;
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Backtracking Using Maps (Column + Diagonal Tracking)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Place queens row by row.
+Maintain three hash maps (or vectors) to track attacks:
+col[col]: whether column col already has a queen.
+diag1[row - col]: left diagonal (↙↗) tracking.
+diag2[row + col]: right diagonal (↘↖) tracking.
+For each cell (row, col):
+If all three maps show it’s safe, place a queen.
+Mark the column and diagonals as occupied, recurse to the next row.
+Backtrack by unmarking after exploring.
+When row == n, add the board to the result.
+
+Complexity
+Time: O(n!) — each queen placement reduces available columns.
+Space: O(n) — for recursion + map tracking.
+
+class Solution {
+public:
+    vector<vector<string>> ans;
+    int n;
+    unordered_map<int, bool> col, diag1, diag2;
+
+    void helper(vector<string>& board, int row)
+    {
+        if(row == n)
+        {
+            ans.push_back(board);
+            return;
+        }
+
+        for(int c = 0; c < n; c++)
+        {
+            if(!col[c] && !diag1[row - c] && !diag2[row + c])
+            {
+                board[row][c] = 'Q';
+                col[c] = diag1[row - c] = diag2[row + c] = true;
+
+                helper(board, row + 1);
+
+                board[row][c] = '.';
+                col[c] = diag1[row - c] = diag2[row + c] = false;
+            }
+        }
+    }
+
+    vector<vector<string>> solveNQueens(int n)
+    {
+        this->n = n;
+        vector<string> board(n, string(n, '.'));
+        helper(board, 0);
+        return ans;
+    }
+};
