@@ -1,0 +1,109 @@
+Approach 1: Two-List Construction (Your Approach – Optimal)
+Explanation
+
+Create two linked lists:
+
+List1 → nodes with values < x
+
+List2 → nodes with values >= x
+
+Traverse the original list once:
+
+Append each node to the appropriate list.
+
+After traversal:
+
+Connect List1 tail to List2 head.
+
+Ensure List2 tail points to nullptr to avoid cycles.
+
+Return List1 head if it exists, else return List2 head.
+
+Complexity
+
+Time: O(n)
+
+Space: O(1) (rearranging nodes in-place)
+
+Code
+class Solution {
+public:
+    ListNode* partition(ListNode* head, int x) {
+        if(!head) return head;
+
+        ListNode *l1 = nullptr, *l2 = nullptr;
+        ListNode *h1 = nullptr, *h2 = nullptr;
+        ListNode* temp = head;
+
+        while(temp)
+        {
+            if(temp->val < x)
+            {
+                if(!l1) l1 = h1 = temp;
+                else { l1->next = temp; l1 = l1->next; }
+            }
+            else
+            {
+                if(!l2) l2 = h2 = temp;
+                else { l2->next = temp; l2 = l2->next; }
+            }
+            temp = temp->next;
+        }
+
+        if(!h1) return h2;
+        if(!h2) return h1;
+
+        l1->next = h2;
+        l2->next = nullptr;
+
+        return h1;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Dummy Node Technique (Cleaner Iterative Version)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use two dummy nodes:
+beforeDummy → builds the < x list
+afterDummy → builds the >= x list
+Traverse original list once and append nodes to the appropriate side.
+
+At the end:
+connect before tail to afterDummy->next
+set after tail’s next to nullptr
+Much cleaner pointer handling; avoids special cases.
+
+Complexity
+Time: O(n)
+Space: O(1)
+
+class Solution {
+public:
+    ListNode* partition(ListNode* head, int x) {
+        ListNode beforeDummy(0), afterDummy(0);
+        ListNode* before = &beforeDummy;
+        ListNode* after = &afterDummy;
+
+        while(head)
+        {
+            if(head->val < x)
+            {
+                before->next = head;
+                before = before->next;
+            }
+            else
+            {
+                after->next = head;
+                after = after->next;
+            }
+            head = head->next;
+        }
+
+        after->next = nullptr;
+        before->next = afterDummy.next;
+
+        return beforeDummy.next;
+    }
+};

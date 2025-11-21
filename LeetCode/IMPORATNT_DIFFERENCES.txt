@@ -1,0 +1,133 @@
+Difference bw the usage of memset and assign
+-------------------------------------------------------------------------------------------------
+
+Use memset when:
+You are working with raw C-style arrays.
+You need to fill with 0 or -1 only (byte-wise safe).
+You want very fast initialization.
+You’re dealing with POD types (int, char, bool array).
+Memory must be reset in constant time.
+
+
+Use assign when:
+You work with STL containers (vector, string).
+You need to fill with any typed value, not just bytes.
+The container must be resized + filled in one step.
+Elements are non-POD, like objects or structs.
+You want type-safe initialization.
+
+
+🟦 5 Code Examples Using memset
+________________________________
+
+1. Initialize int array with 0
+int arr[100];
+memset(arr, 0, sizeof(arr));
+
+2. Initialize DP array with -1
+int dp[201][2001];
+memset(dp, -1, sizeof(dp));
+
+3. Reset visited array (bool)
+bool vis[1000];
+memset(vis, false, sizeof(vis));
+
+4. Initialize char buffer
+char buf[256];
+memset(buf, 'A', sizeof(buf));
+
+5. Reset entire struct array (POD only)
+struct Node { int x, y; };
+Node a[50];
+memset(a, 0, sizeof(a));
+
+
+🟧 5 Code Examples Using assign
+________________________________
+
+1. Fill vector with all 0s
+vector<int> v;
+v.assign(10, 0);
+
+2. Replace contents with some value (e.g., 7)
+vector<int> v = {1,2,3};
+v.assign(5, 7);
+
+3. Assign from another container
+vector<int> a = {1,2,3,4};
+vector<int> b;
+b.assign(a.begin(), a.end());
+
+4. Reset string
+string s;
+s.assign(20, 'x');
+
+5. Fill vector of objects
+struct Point { int x, y; };
+vector<Point> v;
+v.assign(5, {0, 0}); 
+
+
+-------------------------------------------------------------------------------------------------
+When to Use 1D, 2D, and 3D DP
+-------------------------------------------------------------------------------------------------
+
+🟦 1D DP (One-Dimensional DP)
+________________________________
+
+Use 1D DP when the state depends on only one variable.
+
+Use 1D DP when:
+Transition depends only on previous index or value.
+The problem reduces to linear recurrence.
+Only one choice parameter affects the state.
+Classic “take/skip” or “best up to index i”.
+Rolling array optimizations reduce 2D → 1D.
+
+Typical examples:
+Fibonacci
+Coin change (min coins / ways to form sum)
+House robber
+Longest increasing subsequence (O(n²) DP version)
+Knapsack (optimized 1D version)
+
+🟧 2D DP (Two-Dimensional DP)
+________________________________
+
+Use 2D DP when the state depends on two variables.
+
+Use 2D DP when:
+One dimension is index; another is capacity / sum / constraint.
+You compare two sequences.
+You need a matrix-like state (i,j).
+You track choices across two changing parameters.
+The recurrence depends on subproblems like dp[i-1][j], dp[i][j-1], dp[i-1][j-1].
+
+Typical examples:
+0/1 knapsack (dp[n][W])
+Longest common subsequence (dp[i][j])
+Edit distance
+Grid paths / matrix DP
+Palindromic substring DP
+
+🟥 3D DP (Three-Dimensional DP)
+________________________________
+
+Use 3D DP when the state depends on three independent variables.
+
+Use 3D DP when:
+There are two constraints + index (i, j, k).
+You track extra properties like:
+last character
+last taken object
+count of operations
+Sequences with multiple dimensions of choice.
+Problems with bounded operations like allowed flips, picks, transitions.
+Polygon DP, subsequence DP with extra states, or DP involving two strings + pointer.
+
+Typical examples:
+DP[i][j][k] for knapsack with 2 constraints (weight + volume)
+Subsequence with k deletions
+Edit distance with constraints
+Counting paths with extra limit (e.g., exactly k turns)
+Digit DP with multiple flags

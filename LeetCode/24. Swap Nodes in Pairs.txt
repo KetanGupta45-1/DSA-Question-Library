@@ -1,0 +1,80 @@
+Approach 1: Iterative Pointer Manipulation (Your Code ✅)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Swap adjacent pairs using three pointers:
+temp1 → first node
+temp2 → second node
+prev → the previous pair’s tail
+For each pair:
+Store front = temp2->next (start of next pair).
+Link temp2->next = temp1 (swap pair).
+Link previous pair’s tail (prev) to temp2.
+Move to next pair (temp1 = front, temp2 = temp1->next).
+Keep track of the new head (second node of first pair).
+
+Complexity
+Time: O(n) — each node visited once.
+Space: O(1) — in-place swapping.
+
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head)
+    {
+        if(!head || !head->next)
+            return head;
+
+        ListNode* temp1 = head;
+        ListNode* temp2 = head->next;
+        ListNode* newhead = temp2;
+        ListNode* prev = nullptr;
+
+        while(temp1 && temp2)
+        {
+            ListNode* front = temp2->next;
+            temp1->next = front;
+            temp2->next = temp1;
+
+            if(prev)
+                prev->next = temp2;
+
+            prev = temp1;
+            temp1 = front;
+            temp2 = temp1 ? temp1->next : nullptr;
+        }
+
+        return newhead;
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Recursive Swapping
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Base Case:
+If list is empty or has only one node, return head.
+Recursive Step:
+Swap the first two nodes.
+Recursively call for the rest of the list (head->next->next).
+Link current pair’s second node to the recursive result.
+Each call swaps one pair and returns the new head of that segment.
+
+Complexity
+Time: O(n) — every node visited once.
+Space: O(n) — recursion stack.
+
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head)
+    {
+        if(!head || !head->next)
+            return head;
+
+        ListNode* newHead = head->next;
+        head->next = swapPairs(head->next->next);
+        newHead->next = head;
+
+        return newHead;
+    }
+};

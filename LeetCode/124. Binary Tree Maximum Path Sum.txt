@@ -1,0 +1,93 @@
+Approach 1: Brute Force (Explore All Paths)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Generate every possible path in the tree (each path can start and end at any node).
+For each pair of nodes, compute the sum of all nodes on the path between them.
+Track the maximum path sum over all such pairs.
+This requires recomputing many overlapping subtree sums again and again — very inefficient.
+
+Complexity
+Time : O(n²) — computing paths for each node pair.
+Space : O(h) recursion depth (where h is tree height).
+
+class Solution {
+public:
+    int pathSumFrom(TreeNode* node, int& globalMax)
+    {
+        if(!node) return INT_MIN;
+
+        // Max path starting at current node and going down
+        int left = max(0, pathSumFrom(node->left, globalMax));
+        int right = max(0, pathSumFrom(node->right, globalMax));
+
+        // Update global max considering path through this node
+        globalMax = max(globalMax, node->val + left + right);
+
+        return node->val + max(left, right);
+    }
+
+    int bruteForce(TreeNode* root)
+    {
+        if(!root) return INT_MIN;
+        int globalMax = INT_MIN;
+        vector<TreeNode*> all;
+        collect(root, all);
+
+        for(TreeNode* node : all)
+        {
+            int val = INT_MIN;
+            pathSumFrom(node, val);
+            globalMax = max(globalMax, val);
+        }
+        return globalMax;
+    }
+
+    void collect(TreeNode* root, vector<TreeNode*>& all)
+    {
+        if(!root) return;
+        all.push_back(root);
+        collect(root->left, all);
+        collect(root->right, all);
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Dynamic Programming on Tree (Post-Order DFS) ✅
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Perform a post-order traversal (process children before parent).
+For each node:
+Compute the maximum gain from the left and right subtrees (ignore negatives).
+The best path through this node is node->val + left_gain + right_gain.
+Update the global result res with this value.
+Return the best single-side path (node + max(left,right)) to the parent recursion call.
+This ensures each subtree is computed once → O(n).
+
+Complexity
+Time : O(n) — each node visited once.
+Space : O(h) — recursion depth.
+
+class Solution {
+public:
+    int res;
+
+    int helper(TreeNode* root)
+    {
+        if(!root) return 0;
+
+        int l = max(0, helper(root->left));
+        int r = max(0, helper(root->right));
+
+        res = max(res, root->val + l + r);
+        return root->val + max(l, r);
+    }
+
+    int maxPathSum(TreeNode* root)
+    {
+        res = INT_MIN;
+        helper(root);
+        return res;
+    }
+};

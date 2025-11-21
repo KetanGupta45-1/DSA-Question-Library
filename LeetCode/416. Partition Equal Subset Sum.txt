@@ -1,0 +1,154 @@
+Approach 1: Pure Recursion (No Memoization)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Try to either take or skip each element.
+Goal: reach req = sum/2.
+Explore all subsets — exponential.
+Base cases:
+req == 0 → success
+i == n or req < 0 → failure
+
+Complexity
+Time: O(2ⁿ)
+Space: O(n)
+
+class Solution {
+public:
+    bool solve(vector<int>& nums, int i, int req)
+    {
+        if(req == 0) return true;
+        if(i == nums.size() || req < 0) return false;
+
+        return solve(nums, i+1, req) ||
+               solve(nums, i+1, req - nums[i]);
+    }
+
+    bool canPartition(vector<int>& nums)
+    {
+        int sum = 0;
+        for(int x : nums) sum += x;
+        if(sum % 2) return false;
+        return solve(nums, 0, sum/2);
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 2: Top-Down DP (Memoized Recursion)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Same recursion, but store results in dp[i][req].
+Avoids recomputation of overlapping subproblems.
+Very efficient for constraints.
+
+Complexity
+Time: O(n × (sum/2))
+Space: O(n × (sum/2)) + recursion stack
+
+class Solution {
+public:
+    int n;
+    int dp[201][20001];
+
+    bool solve(vector<int>& nums, int i, int req)
+    {
+        if(req == 0) return true;
+        if(i >= n || req < 0) return false;
+        if(dp[i][req] != -1) return dp[i][req];
+
+        bool skip = solve(nums, i+1, req);
+        bool take = solve(nums, i+1, req - nums[i]);
+
+        return dp[i][req] = (skip || take);
+    }
+
+    bool canPartition(vector<int>& nums)
+    {
+        n = nums.size();
+        int sum = 0;
+        for(int x : nums) sum += x;
+        if(sum % 2) return false;
+
+        memset(dp, -1, sizeof(dp));
+        return solve(nums, 0, sum/2);
+    }
+};
+
+-------------------------------------------------------------------------------------------------
+Approach 3: Bottom-Up DP (0/1 Knapsack Table)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Use classical subset-sum formulation.
+dp[i][j] = true if using first i items we can make sum j.
+Transition:
+dp[i][j] = dp[i-1][j]
+OR dp[i-1][j - nums[i-1]]
+
+Complexity
+Time: O(n × (sum/2))
+Space: O(n × (sum/2))
+
+class Solution {
+public:
+    bool canPartition(vector<int>& nums)
+    {
+        int sum = 0;
+        for(int x : nums) sum += x;
+        if(sum % 2) return false;
+
+        int target = sum / 2;
+        int n = nums.size();
+
+        vector<vector<bool>> dp(n+1, vector<bool>(target+1, false));
+        for(int i = 0; i <= n; i++) dp[i][0] = true;
+
+        for(int i = 1; i <= n; i++)
+        {
+            for(int j = 1; j <= target; j++)
+            {
+                dp[i][j] = dp[i-1][j];
+                if(j >= nums[i-1])
+                    dp[i][j] = dp[i][j] || dp[i-1][j - nums[i-1]];
+            }
+        }
+
+        return dp[n][target];
+    }
+};
+
+
+-------------------------------------------------------------------------------------------------
+Approach 4: Bitset DP (Most Optimized & Cleanest)
+-------------------------------------------------------------------------------------------------
+
+Explanation
+Maintain a bitset bits where:
+bits[s] = 1 means sum s achievable.
+For each num, left-shift bitset and OR with original:
+bits |= (bits << num);
+Check if target bit becomes 1.
+
+Complexity
+Time: O(n × sum/word-size) ≈ O(n × (sum/64))
+Space: O(sum/2)
+
+class Solution {
+public:
+    bool canPartition(vector<int>& nums)
+    {
+        int sum = 0;
+        for(int x : nums) sum += x;
+        if(sum % 2) return false;
+
+        int target = sum / 2;
+        bitset<20001> bits;
+        bits[0] = 1;
+
+        for(int x : nums)
+            bits |= (bits << x);
+
+        return bits[target];
+    }
+};
